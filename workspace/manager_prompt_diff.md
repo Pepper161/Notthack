@@ -97,7 +97,7 @@ The next manager prompt must:
 - treat Node backend as the current API surface that must stay stable
 - treat Anchor + localnet as the next technical objective
 - require real-chain validation, not just docs
-- keep the old `public/` UI as temporary until Flutter + live-chain path is proven
+- assume Flutter web served by the backend is already the active local demo path
 
 ## What Older Wording Should No Longer Be Trusted
 

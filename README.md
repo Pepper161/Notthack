@@ -1,6 +1,6 @@
 # Notthack
 
-`MealTrust` is the current working title for this project.
+`NourishChain` is the current project name for this demo.
 
 This repository contains a judge-ready local demo for the BGA Track at NottsHack:
 
@@ -11,7 +11,7 @@ This repository contains a judge-ready local demo for the BGA Track at NottsHack
 - a narrow blockchain-style trust layer for redemption, revocation, and audit checkpoints
 - a Flutter app as the primary UI surface
 
-![MealTrust demo UI](docs/assets/mealtrust-demo.png)
+![NourishChain demo UI](docs/assets/mealtrust-demo.png)
 
 ## What This Project Is
 
@@ -109,7 +109,27 @@ The backend listens on:
 http://localhost:3000
 ```
 
-### Start the Flutter UI
+### Build the Flutter web UI
+
+```bash
+cd mealtrust_app
+flutter build web
+```
+
+### Start the backend and serve the built UI
+
+```bash
+cd ..
+npm start
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+### Optional: run Flutter in Chrome debug mode
 
 ```bash
 cd mealtrust_app
@@ -137,7 +157,7 @@ Use the app in this order:
 ## Repository Structure
 
 - `src/` — backend server and state logic
-- `mealtrust_app/` — primary Flutter UI
+- `mealtrust_app/` — primary Flutter UI and web build source
 - `anchor/` — minimal Solana / Anchor trust-layer scaffold
 - `scripts/` — acceptance checks
 - `docs/` — concept notes and team-share docs
