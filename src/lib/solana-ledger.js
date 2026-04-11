@@ -15,16 +15,16 @@ const DEFAULT_CLUSTER = process.env.SOLANA_CLUSTER ?? "localnet";
 const DEFAULT_RPC_URL = process.env.SOLANA_RPC_URL ?? "http://127.0.0.1:8899";
 const DEFAULT_PROGRAM_KEYPAIR_PATH =
   process.env.SOLANA_PROGRAM_KEYPAIR_PATH ??
-  path.join(anchorRoot, "target", "deploy", "mealtrust_state-keypair.json");
+  path.join(anchorRoot, "target", "deploy", "nourishchain_state-keypair.json");
 const DEFAULT_AUTHORITY_KEYPAIR_PATH =
   process.env.SOLANA_AUTHORITY_KEYPAIR_PATH ??
   path.join(os.homedir(), ".config", "solana", "id.json");
 const DEFAULT_IDL_PATH =
-  process.env.SOLANA_IDL_PATH ?? path.join(anchorRoot, "target", "idl", "mealtrust_state.json");
+  process.env.SOLANA_IDL_PATH ?? path.join(anchorRoot, "target", "idl", "nourishchain_state.json");
 
 const STATIC_IDL = {
   version: "0.1.0",
-  name: "mealtrust_state",
+  name: "nourishchain_state",
   address: "AWyYvJCuYwn2FQvQj4P3nz3vmTgn8HgJBY6itReuy1pu",
   instructions: [
     {

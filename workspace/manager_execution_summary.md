@@ -2,7 +2,7 @@
 
 ## Current Integration Update
 
-- imported `mealtrust_app/` from `origin/Charles_branch`
+- imported `nourishchain_app/` from `origin/Charles_branch`
 - kept the existing Node backend temporarily so the incoming Flutter UI has a live API target
 - aligned backend responses with Flutter expectations:
   - added `GET /api/student/:studentId/voucher`
@@ -17,7 +17,7 @@
   - `solana-cli 3.1.13`
   - `anchor-cli 0.32.1`
 - added a minimal Anchor workspace in `anchor/`
-  - one program: `mealtrust_state`
+  - one program: `nourishchain_state`
   - one PDA per voucher hash
   - one narrow on-chain record for `active / revoked / redeemed`
   - `override_logged` stays an event and counter, not a main state
@@ -69,7 +69,7 @@ Blockchain remains narrow and backend-only:
 - goal: codify the narrow chain state in one minimal Anchor program
 - owned components: `anchor/**`
 - required inputs: frozen voucher state model and blockchain scope guardrails
-- expected outputs: one buildable `mealtrust_state` program with redeem/revoke/override instructions
+- expected outputs: one buildable `nourishchain_state` program with redeem/revoke/override instructions
 - stop condition: Anchor workspace is present and the first build path is established
 
 ### Workstream B — UI surfaces
@@ -115,14 +115,14 @@ Blockchain remains narrow and backend-only:
 - `anchor/.gitignore`
 - `anchor/Anchor.toml`
 - `anchor/Cargo.toml`
-- `anchor/programs/mealtrust_state/Cargo.toml`
-- `anchor/programs/mealtrust_state/Xargo.toml`
-- `anchor/programs/mealtrust_state/src/lib.rs`
+- `anchor/programs/nourishchain_state/Cargo.toml`
+- `anchor/programs/nourishchain_state/Xargo.toml`
+- `anchor/programs/nourishchain_state/src/lib.rs`
 - `public/index.html`
 - `public/styles.css`
 - `public/app.js`
 - `public/README.md`
-- `mealtrust_app/**`
+- `nourishchain_app/**`
 - `scripts/acceptance-check.js`
 - `workspace/run_log.md`
 - `workspace/manager_execution_summary.md`
@@ -143,10 +143,10 @@ Blockchain remains narrow and backend-only:
 - `node --check public/app.js`
 - `node --check scripts/acceptance-check.js`
 - `npm run test:acceptance`
-- `flutter pub get` in `mealtrust_app/`
-- `flutter analyze` in `mealtrust_app/` (warnings only, no blocking errors after removing stale widget test)
+- `flutter pub get` in `nourishchain_app/`
+- `flutter analyze` in `nourishchain_app/` (warnings only, no blocking errors after removing stale widget test)
 - `node --check src/lib/solana-ledger.js`
-- `cargo check` in `anchor/programs/mealtrust_state`
+- `cargo check` in `anchor/programs/nourishchain_state`
 - `anchor build` in WSL (initial SBF bootstrap started, then stopped after confirming the host-side contract compiles; this remains a follow-up runtime check rather than a contract-design blocker)
 - HTTP smoke checks:
   - `GET /`
@@ -185,7 +185,7 @@ Why it could still miss:
 - The backend now has a stable adapter boundary, but actual Solana writes are still stubbed and return judge-safe placeholders.
 - The first `anchor build` is expensive under WSL because `cargo-build-sbf` bootstraps the Solana SBF toolchain; host-side Rust compilation is already confirmed via `cargo check`.
 - The Flutter app currently depends on the existing Node backend; the actual Solana-backed adapter still needs to replace the local ledger boundary.
-- `mealtrust_app` still has lint-level warnings (`withOpacity`, `const` suggestions). They do not block execution.
+- `nourishchain_app` still has lint-level warnings (`withOpacity`, `const` suggestions). They do not block execution.
 - Browser behavior was smoke-checked by serving pages, not by full browser automation.
 - Revoked-voucher blocking is implemented and testable, but the primary judge story is still duplicate redemption; the pitch should keep that ordering.
 - Manual override is logged, but no full appeal UI exists. This is intentional and should stay that way unless demo credibility requires more.

@@ -36,7 +36,7 @@
 
 - A minimal Anchor workspace now exists under `anchor/`.
 - The current contract direction is narrow and aligned with scope:
-  - one program: `mealtrust_state`
+  - one program: `nourishchain_state`
   - one PDA per voucher hash
   - three instructions:
     - `record_redeem`
@@ -61,7 +61,7 @@
 
 ### UI
 
-- The Flutter app from `Charles_branch` is now present in `mealtrust_app/`.
+- The Flutter app from `Charles_branch` is now present in `nourishchain_app/`.
 - Flutter app currently targets the Node backend at `http://localhost:3000/api`.
 - The Flutter app is the intended forward UI.
 - The old web UI in `public/` still exists and is still what `npm start` serves.
@@ -108,7 +108,7 @@ How to resolve:
 This is stale.
 
 Why:
-- `mealtrust_app/` now exists and is the intended UI direction
+- `nourishchain_app/` now exists and is the intended UI direction
 - the old `public/` UI is temporary compatibility scaffolding
 
 ### 4. “Delete `src/` because old JS can be discarded”
@@ -147,13 +147,13 @@ More concretely:
 
 1. make `anchor build` complete successfully
 2. run `solana-test-validator`
-3. deploy `mealtrust_state` to localnet
+3. deploy `nourishchain_state` to localnet
 4. wire `src/lib/solana-ledger.js` to make live Anchor calls for:
    - redeem
    - revoke
    - override log
 5. keep issuance off-chain
-6. keep the existing backend API contract stable for `mealtrust_app`
+6. keep the existing backend API contract stable for `nourishchain_app`
 7. verify that:
    - redeem writes real localnet transactions
    - duplicate redemption remains blocked

@@ -20,7 +20,7 @@ That prompt assumed:
 ### Change 1: The repo now already has a real Flutter UI
 
 New fact:
-- `mealtrust_app/` exists and is connected to the backend contract
+- `nourishchain_app/` exists and is connected to the backend contract
 
 Why this matters:
 - the next run should not spend time rebuilding issuer / merchant / student / auditor UI from scratch
@@ -33,7 +33,7 @@ Older wording that should no longer be trusted:
 
 New fact:
 - `anchor/` exists
-- `mealtrust_state` already defines the narrow state shape
+- `nourishchain_state` already defines the narrow state shape
 
 Why this matters:
 - the next run should not start from chain design ideation

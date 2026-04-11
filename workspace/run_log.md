@@ -163,7 +163,7 @@ Why it can lose:
   - `anchor-cli 0.32.1`
   - `rustc 1.94.1`
   - `node 18.19.1`
-- imported `mealtrust_app/` from `Charles_branch`
+- imported `nourishchain_app/` from `Charles_branch`
 - kept the existing Node backend temporarily to avoid breaking the incoming Flutter UI
 - added Flutter-compatible backend endpoints:
   - `GET /api/student/:studentId/voucher`
@@ -178,14 +178,14 @@ Why it can lose:
 
 ## Current Recommendation
 
-- keep `mealtrust_app/` as the incoming UI surface
+- keep `nourishchain_app/` as the incoming UI surface
 - keep the existing Node backend until the Solana-backed backend contract is in place
 - do not delete `src/` or `public/` yet
 - next technical step: add the minimal Anchor workspace and replace the local ledger boundary behind the existing API
 
 ## 2026-04-11 Anchor Integration Start
 
-- added `anchor/` with one minimal program: `mealtrust_state`
+- added `anchor/` with one minimal program: `nourishchain_state`
 - fixed the on-chain scope to exactly:
   - redeem checkpoint
   - revoke checkpoint
@@ -198,7 +198,7 @@ Why it can lose:
   - `node --check src/lib/solana-ledger.js`
   - `node --check scripts/acceptance-check.js`
   - `npm run test:acceptance`
-  - `cargo check` in `anchor/programs/mealtrust_state`
+  - `cargo check` in `anchor/programs/nourishchain_state`
 - started `anchor build` from WSL
   - the first run is slow because `cargo-build-sbf` bootstraps toolchain components
   - host-side contract compilation already passed with `cargo check`
@@ -209,7 +209,7 @@ Why it can lose:
 - audited the latest repo and workspace state before drafting the next manager prompt
 - identified that the older manager prompt is now stale in three important ways:
   - it still assumes broad MVP buildout work, but the MVP and judge package already exist
-  - it still assumes no imported Flutter UI, but `mealtrust_app/` is now present
+  - it still assumes no imported Flutter UI, but `nourishchain_app/` is now present
   - it still assumes the ledger should remain abstracted, but the current user objective is to introduce real Solana localnet integration
 - documented the updated state in:
   - `workspace/repo_state_audit.md`

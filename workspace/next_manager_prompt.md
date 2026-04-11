@@ -18,12 +18,12 @@ Read first:
 - `workspace/phase6_acceptance_tests.md`
 - `workspace/phase8_demo_operator_script.md`
 - `workspace/phase8_blockchain_credibility_decision.md`
-- `mealtrust_app/lib/services/api_service.dart`
+- `nourishchain_app/lib/services/api_service.dart`
 - `src/server.js`
 - `src/lib/state.js`
 - `src/lib/solana-ledger.js`
 - `anchor/Anchor.toml`
-- `anchor/programs/mealtrust_state/src/lib.rs`
+- `anchor/programs/nourishchain_state/src/lib.rs`
 
 ## Important conflict handling
 
@@ -89,7 +89,7 @@ Produce a working localnet-backed implementation where:
    - revoke
    - override log
 5. issuance remains off-chain
-6. the existing backend API contract remains compatible with `mealtrust_app`
+6. the existing backend API contract remains compatible with `nourishchain_app`
 7. the product still supports:
    - voucher issuance or seeded issuance
    - wallet-free student QR presentation
@@ -137,7 +137,7 @@ Owned files/components:
 - `anchor/**`
 
 Required inputs:
-- current program in `anchor/programs/mealtrust_state/src/lib.rs`
+- current program in `anchor/programs/nourishchain_state/src/lib.rs`
 - `anchor/Anchor.toml`
 
 Expected outputs:
@@ -184,7 +184,7 @@ Owned files/components:
 - runtime state files only if truly necessary
 
 Required inputs:
-- current Flutter API expectations from `mealtrust_app/lib/services/api_service.dart`
+- current Flutter API expectations from `nourishchain_app/lib/services/api_service.dart`
 
 Expected outputs:
 - no API shape regression for Flutter
@@ -199,7 +199,7 @@ Goal:
 - verify the Flutter app still works against the backend after the Solana integration
 
 Owned files/components:
-- `mealtrust_app/**`
+- `nourishchain_app/**`
 
 Required inputs:
 - current backend API
@@ -273,7 +273,7 @@ You must validate at least:
 - auditor-visible meaningful history
 
 ### Flutter
-- verify that `mealtrust_app` can still call the backend
+- verify that `nourishchain_app` can still call the backend
 - if needed, run `flutter analyze`
 - only fix Flutter warnings if they block the demo or materially reduce clarity
 

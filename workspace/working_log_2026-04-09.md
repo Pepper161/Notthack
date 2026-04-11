@@ -56,15 +56,15 @@ Confirmed that the repository does **not** yet have one fixed official project n
 
 Current naming direction discussed:
 
-- `MealTrust`
-- `Campus MealTrust`
+- `NourishChain`
+- `Campus NourishChain`
 - `AidPass`
 - `Campus AidPass`
 - `VoucherTrust`
 
 Current recommended candidate:
 
-- `MealTrust`
+- `NourishChain`
 
 ## Files Created Today
 

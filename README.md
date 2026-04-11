@@ -1,6 +1,6 @@
 # Notthack
 
-`MealTrust` is the current working title for this project.
+`NourishChain` is the current working title for this project.
 
 This repository contains a judge-ready local demo for the BGA Track at NottsHack:
 
@@ -10,7 +10,7 @@ This repository contains a judge-ready local demo for the BGA Track at NottsHack
 - an auditor-visible history of meaningful events
 - a narrow blockchain-style trust layer for redemption, revocation, and audit checkpoints
 
-![MealTrust demo UI](docs/assets/mealtrust-demo.png)
+![NourishChain demo UI](docs/assets/nourishchain-demo.png)
 
 ## What This Project Is
 
