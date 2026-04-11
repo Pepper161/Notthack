@@ -247,3 +247,20 @@ Deferred:
 - mobile-native apps
 - complex merchant onboarding
 - automated fraud scoring
+
+## Latest Runtime Note
+
+- `mealtrust_app` currently builds for web successfully with `flutter build web`
+- `flutter run -d chrome` is still unstable on this machine because the Chrome debug launcher resolves the Flutter web SDK path incorrectly
+- to keep the local demo reliable, `src/server.js` now serves `mealtrust_app/build/web` automatically when that build exists
+- current recommended local demo path:
+  1. `cd mealtrust_app && flutter build web`
+  2. `npm start`
+  3. open `http://localhost:3000`
+
+## Current Branding Note
+
+- outward-facing product name is now `NourishChain`
+- internal identifiers remain unchanged for now where renaming would create avoidable integration risk:
+  - `mealtrust_app/`
+  - `mealtrust_state`

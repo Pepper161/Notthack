@@ -75,7 +75,7 @@ to:
 - real Solana localnet-backed redeem / revoke / override logging
 - stable backend API contract for Flutter
 - validated localnet end-to-end flow
-- demo-safe primary path ready to present through Flutter first, not the old web UI
+- demo-safe primary path served from the built Flutter web app through the Node backend
 
 ## Primary Success Condition
 
@@ -99,14 +99,6 @@ Produce a working localnet-backed implementation where:
    - revoked voucher block
    - unauthorized merchant block
    - auditor visibility of meaningful history
-
-## Secondary Success Condition
-
-If the live localnet path is stable enough:
-- make Flutter the practical demo surface
-- demote the old `public/` UI from primary usage
-
-Do not delete the old web UI unless the Flutter + backend + localnet path is already proven stable.
 
 ## Manager Operating Mode
 
@@ -305,13 +297,7 @@ Do not build these unless absolutely necessary:
 - offline mode
 - multi-campus support
 - advanced analytics
-- full deletion/refactor of old web UI before Flutter path is proven
-
-## Decision Rule For Old Web UI
-
-Do not spend time polishing `public/`.
-Use it only as a temporary fallback.
-Only delete or demote it after the Flutter + localnet-backed path is known good.
+- any reintroduction of a legacy web UI path
 
 ## Definition Of Done
 

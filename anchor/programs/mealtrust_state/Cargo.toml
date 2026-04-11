@@ -1,7 +1,7 @@
 [package]
 name = "mealtrust_state"
 version = "0.1.0"
-description = "Minimal voucher checkpoint program for MealTrust"
+description = "Minimal voucher checkpoint program for NourishChain"
 edition = "2021"
 
 [lib]
@@ -18,4 +18,3 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
-

@@ -1,4 +1,7 @@
 import express from "express";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import QRCode from "qrcode";
 import {
   deriveVoucherHash,
@@ -30,8 +33,15 @@ import {
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const flutterWebBuildDir = path.resolve(__dirname, "../mealtrust_app/build/web");
+const hasFlutterWebBuild = fs.existsSync(path.join(flutterWebBuildDir, "index.html"));
 
 app.use(express.json());
+
+if (hasFlutterWebBuild) {
+  app.use(express.static(flutterWebBuildDir));
+}
 
 function sendJsonError(res, status, message, extra = {}) {
   return res.status(status).json({
@@ -196,7 +206,7 @@ async function sendPassSvg(res, qrPayload) {
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
-    service: "bga-university-hardship-voucher-demo",
+    service: "nourishchain-api",
   });
 });
 
@@ -580,16 +590,26 @@ app.get("/api/context", (_req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  res.json({
+  if (hasFlutterWebBuild) {
+    return res.sendFile(path.join(flutterWebBuildDir, "index.html"));
+  }
+
+  return res.json({
     ok: true,
-    service: "bga-university-hardship-voucher-demo",
+    service: "nourishchain-api",
     mode: "api_only",
     ui: {
       primary: "mealtrust_app",
-      launch: "Run `flutter run` inside mealtrust_app/.",
+      launch: "Run `flutter build web` inside mealtrust_app/, then `npm start` to serve the built app.",
     },
   });
 });
+
+if (hasFlutterWebBuild) {
+  app.get(/^(?!\/api\/).*/, (_req, res) => {
+    res.sendFile(path.join(flutterWebBuildDir, "index.html"));
+  });
+}
 
 app.use((_req, res) => sendJsonError(res, 404, "Not found"));
 

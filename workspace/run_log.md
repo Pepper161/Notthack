@@ -254,3 +254,34 @@ Why it can lose:
   - `npm start` for backend
   - `flutter run` in `mealtrust_app/` for the UI
 - confirmed that the project now treats Flutter as the primary UI surface
+
+## 2026-04-11 Flutter Web Runtime Fallback
+
+- investigated a Chrome debug failure in `mealtrust_app/`
+- confirmed the app source is valid by running `flutter build web` successfully
+- confirmed the failure is in the Chrome debug launcher path resolution, not in the app code
+- added a runtime fallback in `src/server.js`:
+  - if `mealtrust_app/build/web/index.html` exists, the backend now serves the built Flutter web app
+  - if no build exists, `/` still returns API-only JSON guidance
+- updated `README.md` to prefer:
+  - `cd mealtrust_app && flutter build web`
+  - `npm start`
+  - open `http://localhost:3000`
+- reran validation:
+  - `node --check src/server.js`
+  - `flutter build web`
+  - `npm run test:acceptance`
+
+## 2026-04-12 Brand Name Update
+
+- updated outward-facing product naming from `MealTrust` to `NourishChain`
+- kept internal implementation names stable where renaming would create avoidable risk:
+  - `mealtrust_app/`
+  - `mealtrust_state`
+- updated visible product surfaces:
+  - `README.md`
+  - Flutter app title and login screen
+  - web manifest and web page title
+  - Android app label
+  - setup and app readme text
+  - backend service name in health/root responses

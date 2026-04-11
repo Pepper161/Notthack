@@ -1,4 +1,4 @@
-# mealtrust
+# NourishChain
 
 A new Flutter project.
 

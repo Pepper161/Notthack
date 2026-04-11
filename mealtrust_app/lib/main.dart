@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const MealTrustApp());
+  runApp(const NourishChainApp());
 }
 
-class MealTrustApp extends StatelessWidget {
-  const MealTrustApp({super.key});
+class NourishChainApp extends StatelessWidget {
+  const NourishChainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MealTrust',
+      title: 'NourishChain',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

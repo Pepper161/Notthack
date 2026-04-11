@@ -63,11 +63,9 @@
 
 - The Flutter app from `Charles_branch` is now present in `mealtrust_app/`.
 - Flutter app currently targets the Node backend at `http://localhost:3000/api`.
-- The Flutter app is the intended forward UI.
-- The old web UI in `public/` still exists and is still what `npm start` serves.
-- Therefore:
-  - the old web UI is not yet deleted
-  - the Flutter app is not yet the default served experience
+- The Flutter app is now the primary UI surface.
+- `public/` has already been removed.
+- The built Flutter web app is now the default served experience when `mealtrust_app/build/web` exists.
 
 ## Current Confirmed Demo / Pitch State
 
@@ -103,13 +101,14 @@ How to resolve:
 - override the older “do not add real-chain checkpoint” recommendation for implementation purposes
 - keep the same narrow chain boundary
 
-### 3. “The old web UI is the main surface”
+### 3. “The old web UI is still the main or fallback surface”
 
 This is stale.
 
 Why:
-- `mealtrust_app/` now exists and is the intended UI direction
-- the old `public/` UI is temporary compatibility scaffolding
+- `mealtrust_app/` is now the actual primary UI direction
+- `public/` has already been deleted
+- the backend now serves the built Flutter web output
 
 ### 4. “Delete `src/` because old JS can be discarded”
 
@@ -135,9 +134,8 @@ Why:
 3. No IDL or generated client path is wired into the Node backend yet.
 4. `GET /api/solana/status` still reports stub status rather than live program connectivity.
 5. The Flutter app still depends on localhost assumptions and may need small setup fixes per target platform.
-6. The old `public/` UI still exists, which can create confusion about what the true demo surface is.
-7. `src/data/runtime-state.json` is still part of the live state path and may need to remain partially authoritative until on-chain writes are proven stable.
-8. Acceptance coverage currently proves backend behavior, but not yet real-chain side effects.
+6. `src/data/runtime-state.json` is still part of the live state path and may need to remain partially authoritative until on-chain writes are proven stable.
+7. Acceptance coverage currently proves backend behavior, but not yet real-chain side effects.
 
 ## Exact Recommended Objective For The Next Run
 
@@ -160,7 +158,7 @@ More concretely:
    - revoked voucher remains blocked
    - unauthorized merchant remains blocked
    - auditor history still works
-8. if stable, shift the primary demo path toward Flutter and demote the old `public/` UI
+8. keep the primary demo path on built Flutter web served by the backend
 
 ## Practical Reading Of AGENTS.md vs Latest State
 
