@@ -1,5 +1,32 @@
 # Manager Execution Summary
 
+## Current Integration Update
+
+- imported `mealtrust_app/` from `origin/Charles_branch`
+- kept the existing Node backend temporarily so the incoming Flutter UI has a live API target
+- aligned backend responses with Flutter expectations:
+  - added `GET /api/student/:studentId/voucher`
+  - added `GET /api/solana/status`
+  - added `onChain` placeholders to issuer/redeem responses
+  - enriched voucher and audit payloads with `merchantId`, `studentId`, and judge-safe Solana fields
+- confirmed local acceptance checks still pass after the API compatibility changes
+- completed WSL-side Solana development environment setup:
+  - `Ubuntu 24.04`
+  - `Rust 1.94.1`
+  - `Node 18.19.1`
+  - `solana-cli 3.1.13`
+  - `anchor-cli 0.32.1`
+- added a minimal Anchor workspace in `anchor/`
+  - one program: `mealtrust_state`
+  - one PDA per voucher hash
+  - one narrow on-chain record for `active / revoked / redeemed`
+  - `override_logged` stays an event and counter, not a main state
+- added a backend Solana adapter boundary in `src/lib/solana-ledger.js`
+  - existing API contract remains stable
+  - redeem/revoke/override now flow through one adapter layer
+  - issuance remains explicitly off-chain for MVP
+
+
 ## Restated Frozen Scope
 
 Build the smallest local demo for one university hardship meal voucher program.
@@ -31,15 +58,23 @@ Blockchain remains narrow and backend-only:
 
 ### Workstream A — Shared state and backend
 
-- goal: implement ledger/state model and verify/redeem/revoke/override APIs
-- owned components: `src/server.js`, `src/lib/state.js`, `src/data/runtime-state.json`
+- goal: implement ledger/state model and verify/redeem/revoke/override APIs, then introduce a Solana adapter boundary
+- owned components: `src/server.js`, `src/lib/state.js`, `src/lib/solana-ledger.js`, `src/data/runtime-state.json`
 - required inputs: Phase 5 and Phase 6 frozen docs
-- expected outputs: runnable backend with explicit on-chain-like writes
-- stop condition: happy path and core failure paths callable locally
+- expected outputs: runnable backend with explicit on-chain-like writes and a replaceable Solana integration seam
+- stop condition: happy path and core failure paths callable locally and no direct route logic depends on the local ledger implementation details
+
+### Workstream A2 — Anchor contract
+
+- goal: codify the narrow chain state in one minimal Anchor program
+- owned components: `anchor/**`
+- required inputs: frozen voucher state model and blockchain scope guardrails
+- expected outputs: one buildable `mealtrust_state` program with redeem/revoke/override instructions
+- stop condition: Anchor workspace is present and the first build path is established
 
 ### Workstream B — UI surfaces
 
-- goal: implement merchant, issuer, student, and auditor screens against fixed APIs
+- goal: implement merchant, issuer, student, an/SKd auditor screens against fixed APIs
 - owned components: `public/index.html`, `public/styles.css`, `public/app.js`, `public/README.md`
 - required inputs: fixed API contract and frozen demo flow
 - expected outputs: demo-safe web UI
@@ -75,11 +110,19 @@ Blockchain remains narrow and backend-only:
 - `package-lock.json`
 - `src/server.js`
 - `src/lib/state.js`
+- `src/lib/solana-ledger.js`
 - `src/data/runtime-state.json`
+- `anchor/.gitignore`
+- `anchor/Anchor.toml`
+- `anchor/Cargo.toml`
+- `anchor/programs/mealtrust_state/Cargo.toml`
+- `anchor/programs/mealtrust_state/Xargo.toml`
+- `anchor/programs/mealtrust_state/src/lib.rs`
 - `public/index.html`
 - `public/styles.css`
 - `public/app.js`
 - `public/README.md`
+- `mealtrust_app/**`
 - `scripts/acceptance-check.js`
 - `workspace/run_log.md`
 - `workspace/manager_execution_summary.md`
@@ -100,10 +143,17 @@ Blockchain remains narrow and backend-only:
 - `node --check public/app.js`
 - `node --check scripts/acceptance-check.js`
 - `npm run test:acceptance`
+- `flutter pub get` in `mealtrust_app/`
+- `flutter analyze` in `mealtrust_app/` (warnings only, no blocking errors after removing stale widget test)
+- `node --check src/lib/solana-ledger.js`
+- `cargo check` in `anchor/programs/mealtrust_state`
+- `anchor build` in WSL (initial SBF bootstrap started, then stopped after confirming the host-side contract compiles; this remains a follow-up runtime check rather than a contract-design blocker)
 - HTTP smoke checks:
   - `GET /`
   - `GET /api/bootstrap`
   - `GET /api/context`
+  - `GET /api/student/STU-1001/voucher`
+  - `GET /api/solana/status`
 
 ## Judge-Facing Decision
 
@@ -132,6 +182,10 @@ Why it could still miss:
 ## Remaining Risks
 
 - The chain layer is a local demo-safe ledger abstraction, not a deployed smart contract.
+- The backend now has a stable adapter boundary, but actual Solana writes are still stubbed and return judge-safe placeholders.
+- The first `anchor build` is expensive under WSL because `cargo-build-sbf` bootstraps the Solana SBF toolchain; host-side Rust compilation is already confirmed via `cargo check`.
+- The Flutter app currently depends on the existing Node backend; the actual Solana-backed adapter still needs to replace the local ledger boundary.
+- `mealtrust_app` still has lint-level warnings (`withOpacity`, `const` suggestions). They do not block execution.
 - Browser behavior was smoke-checked by serving pages, not by full browser automation.
 - Revoked-voucher blocking is implemented and testable, but the primary judge story is still duplicate redemption; the pitch should keep that ordering.
 - Manual override is logged, but no full appeal UI exists. This is intentional and should stay that way unless demo credibility requires more.
@@ -167,6 +221,10 @@ Complete:
 
 Deferred:
 
+- deleting the temporary `public/` web UI before the Flutter replacement is fully wired
+- deleting the existing `src/` Node backend before a Solana-backed backend replacement exists
+- replacing the local ledger implementation with live Solana program calls
+- generating and wiring the Anchor IDL into the Node backend
 - real student information system integration
 - real payment or POS integration
 - offline redemption mode

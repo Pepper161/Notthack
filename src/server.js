@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  deriveVoucherHash,
   applyDemoReset,
   getAuditHistory,
   getState,
@@ -14,6 +15,13 @@ import {
   revokeVoucher,
   verifyVoucher,
 } from "./lib/state.js";
+import {
+  describeOffchainIssuance,
+  getLedgerStatus,
+  recordOverrideLogged,
+  recordVoucherRedeemed,
+  recordVoucherRevoked,
+} from "./lib/solana-ledger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,12 +59,17 @@ function serializeVoucher(state, voucher) {
     issuedAt: voucher.issuedAt,
     revokedAt: voucher.revokedAt,
     redeemedAt: voucher.redeemedAt,
+    merchantId: voucher.redeemedBy ?? null,
     checkpoint: voucher.redemptionCheckpointId ?? voucher.lastCheckpointId ?? null,
-    voucherHash: voucher.voucherHash,
+    voucherHash: deriveVoucherHash(voucher),
   };
 }
 
 function serializeAuditEvent(event) {
+  const state = getState();
+  const voucher = event.voucherId ? state.vouchers[event.voucherId] : null;
+  const ledgerStatus = getLedgerStatus();
+
   return {
     eventId: event.eventId,
     voucherId: event.voucherId,
@@ -65,12 +78,18 @@ function serializeAuditEvent(event) {
     checkpoint: event.checkpointId ?? event.relatedCheckpointId ?? null,
     actorType: event.actorType,
     actorId: event.actorId,
+    merchantId: event.actorType === "merchant" ? event.actorId : voucher?.redeemedBy ?? null,
+    studentId: voucher?.studentId ?? null,
     reason: event.reason ?? null,
+    reasonCode: event.reason ?? null,
     message:
       event.note ??
       event.reason ??
       event.details?.reason ??
       event.type.replaceAll("_", " "),
+    txSignature: null,
+    explorerUrl: null,
+    cluster: ledgerStatus.cluster,
   };
 }
 
@@ -141,6 +160,7 @@ function mapVerifyResult(result) {
 }
 
 function mapRedeemResult(result) {
+  const onChain = result.onChain ?? null;
   return {
     ok: result.ok,
     code: result.code,
@@ -151,6 +171,14 @@ function mapRedeemResult(result) {
     voucherId: result.voucher?.voucherId ?? null,
     checkpointRef: result.checkpointId ?? null,
     voucher: result.voucher ?? null,
+    onChain: onChain ?? (result.ok
+      ? {
+          signature: null,
+          explorerUrl: null,
+          cluster: getLedgerStatus().cluster,
+          checkpointRef: result.checkpointId ?? null,
+        }
+      : null),
   };
 }
 
@@ -200,14 +228,27 @@ app.post("/api/merchant/verify", (req, res) => {
   return res.json(payload);
 });
 
-app.post("/api/merchant/redeem", (req, res) => {
+app.post("/api/merchant/redeem", async (req, res) => {
   const { merchantId, voucherId } = req.body ?? {};
   if (!merchantId || !voucherId) {
     return sendJsonError(res, 400, "merchantId and voucherId are required");
   }
 
   const result = redeemVoucher({ merchantId, voucherId, actorId: merchantId });
+  const onChain = result.ok
+    ? await recordVoucherRedeemed({
+        voucherId,
+        studentId: result.voucher?.studentId ?? null,
+        programId: result.voucher?.programId ?? null,
+        actorId: merchantId,
+        checkpointRef: result.checkpointId ?? null,
+        reference: result.voucher?.studentId ?? "",
+      })
+    : null;
   const payload = mapRedeemResult(result);
+  if (onChain) {
+    payload.onChain = onChain;
+  }
 
   if (result.code === "merchant_not_approved") {
     return res.status(403).json(payload);
@@ -224,7 +265,7 @@ app.post("/api/merchant/redeem", (req, res) => {
   return res.json(payload);
 });
 
-app.post("/api/issuer/issue", (req, res) => {
+app.post("/api/issuer/issue", async (req, res) => {
   const { voucherId, studentId, actorId, note } = req.body ?? {};
   if (!studentId) {
     return sendJsonError(res, 400, "studentId is required");
@@ -232,21 +273,30 @@ app.post("/api/issuer/issue", (req, res) => {
 
   try {
     const voucher = issueVoucher({ voucherId, studentId, actorId, note });
+    const onChain = await describeOffchainIssuance({
+      voucherId: voucher.voucherId,
+      actorId: actorId ?? "staff",
+      studentId: voucher.studentId,
+      programId: voucher.programId,
+    });
     return res.status(201).json({
       ok: true,
+      message: `Voucher issued for ${studentId}`,
+      voucherId: voucher.voucherId,
       voucher: {
         voucherId: voucher.voucherId,
         studentId: voucher.studentId,
         state: voucher.onChainState,
         checkpoint: voucher.redemptionCheckpointId,
       },
+      onChain,
     });
   } catch (error) {
     return sendJsonError(res, 400, error instanceof Error ? error.message : String(error));
   }
 });
 
-app.post("/api/issuer/revoke", (req, res) => {
+app.post("/api/issuer/revoke", async (req, res) => {
   const { voucherId, actorId, reasonCode } = req.body ?? {};
   if (!voucherId) {
     return sendJsonError(res, 400, "voucherId is required");
@@ -254,19 +304,30 @@ app.post("/api/issuer/revoke", (req, res) => {
 
   try {
     const voucher = revokeVoucher({ voucherId, actorId, reason: reasonCode });
+    const onChain = await recordVoucherRevoked({
+      voucherId,
+      studentId: voucher.studentId,
+      programId: voucher.programId,
+      actorId: actorId ?? "staff",
+      checkpointRef: voucher.redemptionCheckpointId ?? null,
+      reference: reasonCode ?? "",
+    });
     return res.json({
       ok: true,
+      message: `Voucher ${voucherId} revoked`,
+      voucherId,
       voucher: {
         voucherId: voucher.voucherId,
         state: voucher.onChainState,
       },
+      onChain,
     });
   } catch (error) {
     return sendJsonError(res, 400, error instanceof Error ? error.message : String(error));
   }
 });
 
-app.post("/api/issuer/override", (req, res) => {
+app.post("/api/issuer/override", async (req, res) => {
   const { voucherId, actorId, overrideReason } = req.body ?? {};
   if (!voucherId) {
     return sendJsonError(res, 400, "voucherId is required");
@@ -274,16 +335,44 @@ app.post("/api/issuer/override", (req, res) => {
 
   try {
     const result = logOverride({ voucherId, actorId, reason: overrideReason });
+    const onChain = await recordOverrideLogged({
+      voucherId,
+      studentId: result.voucher?.studentId ?? null,
+      programId: result.voucher?.programId ?? null,
+      actorId: actorId ?? "staff",
+      checkpointRef: result.checkpointId,
+      reference: result.overrideEventHash,
+    });
     return res.json({
       ok: true,
+      message: `Override logged for ${voucherId}`,
       status: "override_logged",
       voucherId,
       checkpointRef: result.checkpointId,
       overrideEventHash: result.overrideEventHash,
+      onChain,
     });
   } catch (error) {
     return sendJsonError(res, 400, error instanceof Error ? error.message : String(error));
   }
+});
+
+app.get("/api/student/:studentId/voucher", (req, res) => {
+  const pass = getStudentPass(req.params.studentId);
+  if (!pass) {
+    return sendJsonError(res, 404, "No voucher found for student", { status: "unknown_voucher" });
+  }
+
+  return res.json({
+    ok: true,
+    voucherId: pass.voucher.voucherId,
+    studentId: pass.voucher.studentId,
+    state: pass.voucher.onChainState,
+    issuedAt: pass.voucher.issuedAt,
+    redeemedAt: pass.voucher.redeemedAt,
+    revokedAt: pass.voucher.revokedAt,
+    merchantId: pass.voucher.merchantId ?? null,
+  });
 });
 
 app.get("/api/student/:voucherId", (req, res) => {
@@ -404,6 +493,10 @@ app.get("/api/auditor/history", (_req, res) => {
     ok: true,
     events: getAuditHistory().map(serializeAuditEvent).reverse(),
   });
+});
+
+app.get("/api/solana/status", (_req, res) => {
+  res.json(getLedgerStatus());
 });
 
 app.get("/api/context", (_req, res) => {

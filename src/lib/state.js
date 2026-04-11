@@ -225,6 +225,7 @@ function summarizeVoucher(voucher) {
     onChainState: chainState,
     isRevoked: Boolean(onChain.isRevoked),
     isRedeemed: Boolean(onChain.isRedeemed),
+    merchantId: voucher.redeemedBy ?? null,
     lastEventType: onChain.lastEventType,
     lastEventAt: onChain.lastEventAt,
     redemptionCheckpointId: voucher.redemptionCheckpointId,

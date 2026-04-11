@@ -152,3 +152,70 @@ Why it can lose:
 
 - if the story sounds like voucher management instead of shared trust state
 - if the blockchain moment is not pointed out during redemption and audit
+
+## 2026-04-11 Environment And UI Integration
+
+- enabled and repaired WSL on the machine
+- installed Ubuntu 24.04 under WSL
+- installed WSL-side Rust, Node.js, Solana CLI, and Anchor CLI
+- verified:
+  - `solana-cli 3.1.13`
+  - `anchor-cli 0.32.1`
+  - `rustc 1.94.1`
+  - `node 18.19.1`
+- imported `mealtrust_app/` from `Charles_branch`
+- kept the existing Node backend temporarily to avoid breaking the incoming Flutter UI
+- added Flutter-compatible backend endpoints:
+  - `GET /api/student/:studentId/voucher`
+  - `GET /api/solana/status`
+- updated issuer/redeem responses to include `onChain` placeholders expected by Flutter
+- enriched audit and voucher payloads with `merchantId` and `studentId`
+- removed stale Flutter widget test that referenced a deleted `MyApp`
+- ran:
+  - `flutter pub get`
+  - `flutter analyze` (warnings only)
+  - `npm run test:acceptance`
+
+## Current Recommendation
+
+- keep `mealtrust_app/` as the incoming UI surface
+- keep the existing Node backend until the Solana-backed backend contract is in place
+- do not delete `src/` or `public/` yet
+- next technical step: add the minimal Anchor workspace and replace the local ledger boundary behind the existing API
+
+## 2026-04-11 Anchor Integration Start
+
+- added `anchor/` with one minimal program: `mealtrust_state`
+- fixed the on-chain scope to exactly:
+  - redeem checkpoint
+  - revoke checkpoint
+  - override event logging
+- kept issuance explicitly off-chain in both the backend and contract plan
+- added `src/lib/solana-ledger.js` as the backend integration seam
+- updated backend responses so `redeem`, `revoke`, and `override` now come through the adapter path without changing the Flutter-facing API contract
+- ran:
+  - `node --check src/server.js`
+  - `node --check src/lib/solana-ledger.js`
+  - `node --check scripts/acceptance-check.js`
+  - `npm run test:acceptance`
+  - `cargo check` in `anchor/programs/mealtrust_state`
+- started `anchor build` from WSL
+  - the first run is slow because `cargo-build-sbf` bootstraps toolchain components
+  - host-side contract compilation already passed with `cargo check`
+  - the long SBF bootstrap was stopped after confirming the program shape is valid
+
+## 2026-04-11 Next Manager Prompt Synthesis
+
+- audited the latest repo and workspace state before drafting the next manager prompt
+- identified that the older manager prompt is now stale in three important ways:
+  - it still assumes broad MVP buildout work, but the MVP and judge package already exist
+  - it still assumes no imported Flutter UI, but `mealtrust_app/` is now present
+  - it still assumes the ledger should remain abstracted, but the current user objective is to introduce real Solana localnet integration
+- documented the updated state in:
+  - `workspace/repo_state_audit.md`
+  - `workspace/manager_prompt_diff.md`
+  - `workspace/next_manager_prompt.md`
+- set the recommended next objective to:
+  - complete localnet build/deploy
+  - replace the Solana adapter stub with live calls
+  - preserve the Flutter-facing backend contract
