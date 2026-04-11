@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/voucher.dart';
+import 'login_screen.dart';
 
 class AuditorScreen extends StatefulWidget {
   const AuditorScreen({super.key});
@@ -50,6 +52,15 @@ class _AuditorScreenState extends State<AuditorScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await AuthService.instance.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +71,11 @@ class _AuditorScreenState extends State<AuditorScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: _load,
             tooltip: 'Refresh',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: _logout,
           ),
         ],
       ),
@@ -126,7 +142,7 @@ class _AuditorScreenState extends State<AuditorScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
             ),
             child: const Icon(Icons.link, color: Colors.white, size: 16),
@@ -180,7 +196,7 @@ class _AuditorScreenState extends State<AuditorScreen> {
       counts[e.type] = (counts[e.type] ?? 0) + 1;
     }
     return Container(
-      color: const Color(0xFF7B4AE3).withOpacity(0.06),
+      color: const Color(0xFF7B4AE3).withValues(alpha: 0.06),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -235,15 +251,15 @@ class _EventTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.3)),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
               ),
               child: Icon(icon, size: 18, color: color),
             ),
             if (index != 0)
               Container(
-                  width: 2, height: 24, color: Colors.grey.withOpacity(0.2)),
+                  width: 2, height: 24, color: Colors.grey.withValues(alpha: 0.2)),
           ],
         ),
         const SizedBox(width: 12),
@@ -256,7 +272,7 @@ class _EventTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 4,
                     offset: const Offset(0, 2)),
               ],

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/voucher.dart';
+import 'auth_service.dart';
 
 class ApiService {
   static const String _overrideBaseUrl =
@@ -17,12 +18,17 @@ class ApiService {
     };
   }
 
+  static Map<String, String> get _authHeaders =>
+      AuthService.instance.authHeaders();
+  static Map<String, String> get _jsonHeaders =>
+      AuthService.instance.jsonHeaders();
+
   // ─── Issuer ────────────────────────────────────────────────────────────────
 
   static Future<Map<String, dynamic>> issueVoucher(String studentId) async {
     final res = await http.post(
       Uri.parse('$baseUrl/issuer/issue'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'studentId': studentId}),
     );
     return jsonDecode(res.body) as Map<String, dynamic>;
@@ -32,7 +38,7 @@ class ApiService {
       String voucherId, String reasonCode) async {
     final res = await http.post(
       Uri.parse('$baseUrl/issuer/revoke'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'voucherId': voucherId, 'reasonCode': reasonCode}),
     );
     return jsonDecode(res.body) as Map<String, dynamic>;
@@ -42,7 +48,7 @@ class ApiService {
       String voucherId, String reason) async {
     final res = await http.post(
       Uri.parse('$baseUrl/issuer/override'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'voucherId': voucherId, 'overrideReason': reason}),
     );
     return jsonDecode(res.body) as Map<String, dynamic>;
@@ -50,39 +56,43 @@ class ApiService {
 
   // ─── Merchant ──────────────────────────────────────────────────────────────
 
-  static Future<VerifyResult> verifyVoucher(
-      String voucherId, String merchantId) async {
+  static Future<VerifyResult> verifyVoucher(String voucherId) async {
     final res = await http.post(
       Uri.parse('$baseUrl/merchant/verify'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'voucherId': voucherId, 'merchantId': merchantId}),
+      headers: _jsonHeaders,
+      body: jsonEncode({'voucherId': voucherId}),
     );
     return VerifyResult.fromJson(jsonDecode(res.body));
   }
 
-  static Future<Map<String, dynamic>> redeemVoucher(
-      String voucherId, String merchantId) async {
+  static Future<Map<String, dynamic>> redeemVoucher(String voucherId) async {
     final res = await http.post(
       Uri.parse('$baseUrl/merchant/redeem'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'voucherId': voucherId, 'merchantId': merchantId}),
+      headers: _jsonHeaders,
+      body: jsonEncode({'voucherId': voucherId}),
     );
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
   // ─── Student ───────────────────────────────────────────────────────────────
 
-  static Future<Voucher?> getStudentVoucher(String studentId) async {
-    final res = await http
-        .get(Uri.parse('$baseUrl/student/$studentId/voucher'));
+  static Future<Voucher?> getMyVoucher() async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/student/me/voucher'),
+      headers: _authHeaders,
+    );
     if (res.statusCode == 404) return null;
+    if (res.statusCode >= 400) return null;
     return Voucher.fromJson(jsonDecode(res.body));
   }
 
   // ─── Auditor ───────────────────────────────────────────────────────────────
 
   static Future<List<AuditEvent>> getAuditHistory() async {
-    final res = await http.get(Uri.parse('$baseUrl/auditor/history'));
+    final res = await http.get(
+      Uri.parse('$baseUrl/auditor/history'),
+      headers: _authHeaders,
+    );
     final Map<String, dynamic> data = jsonDecode(res.body);
     final List<dynamic> events = data['events'] ?? [];
     return events.map((e) => AuditEvent.fromJson(e)).toList();
@@ -91,21 +101,30 @@ class ApiService {
   // ─── System ────────────────────────────────────────────────────────────────
 
   static Future<List<Voucher>> getVouchers() async {
-    final res = await http.get(Uri.parse('$baseUrl/bootstrap'));
+    final res = await http.get(
+      Uri.parse('$baseUrl/bootstrap'),
+      headers: _authHeaders,
+    );
     final Map<String, dynamic> data = jsonDecode(res.body);
     final List<dynamic> vouchers = data['vouchers'] ?? [];
     return vouchers.map((e) => Voucher.fromJson(e)).toList();
   }
 
   static Future<void> resetSeed() async {
-    await http.post(Uri.parse('$baseUrl/reset'));
+    await http.post(
+      Uri.parse('$baseUrl/reset'),
+      headers: _authHeaders,
+    );
   }
 
   // ─── Solana ────────────────────────────────────────────────────────────────
 
   static Future<SolanaStatus> getSolanaStatus() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/solana/status'));
+      final res = await http.get(
+        Uri.parse('$baseUrl/solana/status'),
+        headers: _authHeaders,
+      );
       return SolanaStatus.fromJson(jsonDecode(res.body));
     } catch (_) {
       return SolanaStatus(enabled: false);

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/voucher.dart';
+import 'login_screen.dart';
 
 class IssuerScreen extends StatefulWidget {
   const IssuerScreen({super.key});
@@ -115,6 +117,15 @@ class _IssuerScreenState extends State<IssuerScreen>
     return '${sig.substring(0, 6)}…${sig.substring(sig.length - 6)}';
   }
 
+  Future<void> _logout() async {
+    await AuthService.instance.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
   Future<String?> _showRevokeDialog() {
     final controller = TextEditingController();
     return showDialog<String>(
@@ -143,6 +154,13 @@ class _IssuerScreenState extends State<IssuerScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Issuer — Student Affairs'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: _logout,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           indicatorColor: Colors.white,

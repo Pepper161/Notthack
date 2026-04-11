@@ -219,3 +219,28 @@ Why it can lose:
   - complete localnet build/deploy
   - replace the Solana adapter stub with live calls
   - preserve the Flutter-facing backend contract
+
+## 2026-04-11 Charles_Branch_2 Review And Integration
+
+- reviewed `origin/Charles_Branch_2`
+- rejected a full merge because the branch mixed useful auth work with a repo-wide rename from `MealTrust` to `NourishChain`
+- kept the frozen product framing and anchor naming on `main`
+- selectively integrated the useful parts:
+  - backend bearer-token auth in `src/lib/auth.js`
+  - role-protected backend routes in `src/server.js`
+  - Flutter login/session layer in `mealtrust_app/lib/services/auth_service.dart`
+  - Flutter login screen in `mealtrust_app/lib/screens/login_screen.dart`
+  - auth-gated role routing in `mealtrust_app/lib/screens/home_screen.dart`
+  - role-aware issuer / merchant / student / auditor screens
+  - acceptance updates for authenticated flows and unauthorized merchant coverage
+- preserved `merchant_not_approved` by adding a blocked merchant demo account bound to `CAF-X`
+- reran validation:
+  - `node --check src/server.js`
+  - `node --check src/lib/auth.js`
+  - `node --check scripts/acceptance-check.js`
+  - `flutter analyze` in `mealtrust_app/`
+  - `npm run test:acceptance`
+- result:
+  - the branch was good directionally
+  - full merge was not accepted
+  - selective integration into `main` was accepted

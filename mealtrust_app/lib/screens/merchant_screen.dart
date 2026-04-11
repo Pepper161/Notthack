@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../models/voucher.dart';
-
-// For demo: hardcode merchant ID. In production this would come from auth.
-// Must match an ID in the backend's approvedMerchants list (CAF-A, CAF-B).
-const _merchantId = 'CAF-A';
+import 'login_screen.dart';
 
 class MerchantScreen extends StatefulWidget {
   const MerchantScreen({super.key});
@@ -48,7 +46,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
       _redeemed = false;
     });
     try {
-      final result = await ApiService.verifyVoucher(voucherId, _merchantId);
+      final result = await ApiService.verifyVoucher(voucherId);
       if (!mounted) return;
       setState(() => _result = result);
     } catch (e) {
@@ -68,7 +66,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
     setState(() => _loading = true);
     try {
       final resp =
-          await ApiService.redeemVoucher(_result!.voucher!.id, _merchantId);
+          await ApiService.redeemVoucher(_result!.voucher!.id);
       if (!mounted) return;
       final onChain = resp['onChain'] as Map<String, dynamic>?;
       setState(() {
@@ -113,11 +111,20 @@ class _MerchantScreenState extends State<MerchantScreen> {
     return '${sig.substring(0, 6)}…${sig.substring(sig.length - 6)}';
   }
 
+  Future<void> _logout() async {
+    await AuthService.instance.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Merchant — Verify & Redeem'),
+        title: Text('Merchant — ${AuthService.instance.merchantId ?? "?"}'),
         actions: [
           if (!_scanning)
             IconButton(
@@ -125,6 +132,11 @@ class _MerchantScreenState extends State<MerchantScreen> {
               tooltip: 'Scan again',
               onPressed: _reset,
             ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: _logout,
+          ),
         ],
       ),
       body: _loading
@@ -238,9 +250,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Column(
               children: [

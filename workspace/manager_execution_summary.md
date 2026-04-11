@@ -25,6 +25,11 @@
   - existing API contract remains stable
   - redeem/revoke/override now flow through one adapter layer
   - issuance remains explicitly off-chain for MVP
+- reviewed `origin/Charles_Branch_2`
+  - accepted role-based auth and login flow
+  - rejected the branch-wide `NourishChain` rename
+  - selectively integrated auth into the existing `MealTrust` codebase instead of merging the branch wholesale
+  - preserved `merchant_not_approved` by keeping `CAF-X` as a blocked merchant account in the demo auth directory
 
 
 ## Restated Frozen Scope
@@ -124,6 +129,9 @@ Blockchain remains narrow and backend-only:
 - `public/README.md`
 - `mealtrust_app/**`
 - `scripts/acceptance-check.js`
+- `src/lib/auth.js`
+- `mealtrust_app/lib/screens/login_screen.dart`
+- `mealtrust_app/lib/services/auth_service.dart`
 - `workspace/run_log.md`
 - `workspace/manager_execution_summary.md`
 - `workspace/phase7_judge_simulation.md`
@@ -145,7 +153,9 @@ Blockchain remains narrow and backend-only:
 - `npm run test:acceptance`
 - `flutter pub get` in `mealtrust_app/`
 - `flutter analyze` in `mealtrust_app/` (warnings only, no blocking errors after removing stale widget test)
+- `flutter analyze` in `mealtrust_app/` (clean after auth integration)
 - `node --check src/lib/solana-ledger.js`
+- `node --check src/lib/auth.js`
 - `cargo check` in `anchor/programs/mealtrust_state`
 - `anchor build` in WSL (initial SBF bootstrap started, then stopped after confirming the host-side contract compiles; this remains a follow-up runtime check rather than a contract-design blocker)
 - HTTP smoke checks:
@@ -185,12 +195,12 @@ Why it could still miss:
 - The backend now has a stable adapter boundary, but actual Solana writes are still stubbed and return judge-safe placeholders.
 - The first `anchor build` is expensive under WSL because `cargo-build-sbf` bootstraps the Solana SBF toolchain; host-side Rust compilation is already confirmed via `cargo check`.
 - The Flutter app currently depends on the existing Node backend; the actual Solana-backed adapter still needs to replace the local ledger boundary.
-- `mealtrust_app` still has lint-level warnings (`withOpacity`, `const` suggestions). They do not block execution.
 - Browser behavior was smoke-checked by serving pages, not by full browser automation.
 - Revoked-voucher blocking is implemented and testable, but the primary judge story is still duplicate redemption; the pitch should keep that ordering.
 - Manual override is logged, but no full appeal UI exists. This is intentional and should stay that way unless demo credibility requires more.
 - The project can still look generic if the pitch does not explicitly frame it as a shared trust layer rather than a voucher app.
 - The current UI is operational rather than iconic; the demo operator script must do some of the narrative lifting.
+- The Flutter app now assumes authenticated sessions for every protected route. Any future API changes must preserve the auth contract or update the app and acceptance script together.
 
 ## Exact Demo Path
 

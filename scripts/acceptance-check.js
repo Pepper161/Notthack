@@ -1,12 +1,14 @@
 const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 async function request(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+
   const response = await fetch(`${baseUrl}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
     ...options,
+    headers,
   });
 
   const text = await response.text();
@@ -21,6 +23,16 @@ async function request(path, options = {}) {
   return { ok: response.ok, status: response.status, body };
 }
 
+async function login(email, password = 'password123') {
+  const response = await request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  assert(response.ok, `login failed for ${email}`);
+  assert(response.body.token, `token missing for ${email}`);
+  return response.body.token;
+}
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
@@ -30,10 +42,21 @@ function assert(condition, message) {
 async function main() {
   console.log(`Acceptance checks against ${baseUrl}`);
 
-  const reset = await request('/api/reset', { method: 'POST' });
+  const issuerToken = await login('affairs@uni.edu');
+  const merchantAToken = await login('cafe-a@merchant.uni.edu');
+  const merchantBToken = await login('cafe-b@merchant.uni.edu');
+  const merchantXToken = await login('cafe-x@merchant.uni.edu');
+  const auditorToken = await login('audit@uni.edu');
+
+  const reset = await request('/api/reset', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${issuerToken}` },
+  });
   assert(reset.ok, 'reset failed');
 
-  const bootstrap = await request('/api/bootstrap');
+  const bootstrap = await request('/api/bootstrap', {
+    headers: { Authorization: `Bearer ${issuerToken}` },
+  });
   assert(bootstrap.ok, 'bootstrap failed');
   assert(Array.isArray(bootstrap.body.vouchers), 'bootstrap vouchers missing');
   assert(Array.isArray(bootstrap.body.merchants), 'bootstrap merchants missing');
@@ -43,8 +66,8 @@ async function main() {
 
   let result = await request('/api/merchant/verify', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantAToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-A',
       voucherId: 'VCH-1001',
     }),
   });
@@ -53,8 +76,8 @@ async function main() {
 
   result = await request('/api/merchant/redeem', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantAToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-A',
       voucherId: 'VCH-1001',
     }),
   });
@@ -64,8 +87,8 @@ async function main() {
 
   result = await request('/api/merchant/verify', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantAToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-A',
       voucherId: 'VCH-1001',
     }),
   });
@@ -77,8 +100,8 @@ async function main() {
 
   result = await request('/api/merchant/redeem', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantAToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-A',
       voucherId: 'VCH-1001',
     }),
   });
@@ -90,6 +113,7 @@ async function main() {
 
   const issued = await request('/api/issuer/issue', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${issuerToken}` },
     body: JSON.stringify({ studentId: 'STU-1002' }),
   });
   assert(issued.ok, 'issuer issue failed');
@@ -98,6 +122,7 @@ async function main() {
 
   const revoked = await request('/api/issuer/revoke', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${issuerToken}` },
     body: JSON.stringify({
       voucherId: revokedVoucherId,
       reasonCode: 'admin_test_revoke',
@@ -107,8 +132,8 @@ async function main() {
 
   result = await request('/api/merchant/verify', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantAToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-A',
       voucherId: revokedVoucherId,
     }),
   });
@@ -117,8 +142,24 @@ async function main() {
 
   result = await request('/api/merchant/verify', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${merchantBToken}` },
     body: JSON.stringify({
-      merchantId: 'CAF-X',
+      voucherId: 'VCH-1001',
+    }),
+  });
+  assert(
+    result.ok,
+    `expected merchant B verify request to succeed, got ${result.status}`
+  );
+  assert(
+    result.body.status === 'already_redeemed',
+    `expected merchant B to see already_redeemed, got ${result.body.status}`
+  );
+
+  result = await request('/api/merchant/verify', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${merchantXToken}` },
+    body: JSON.stringify({
       voucherId: 'VCH-1001',
     }),
   });
@@ -130,6 +171,7 @@ async function main() {
 
   const override = await request('/api/issuer/override', {
     method: 'POST',
+    headers: { Authorization: `Bearer ${issuerToken}` },
     body: JSON.stringify({
       voucherId: revokedVoucherId,
       overrideReason: 'manual review approved replacement process',
@@ -138,7 +180,9 @@ async function main() {
   assert(override.ok, 'override logging failed');
   assert(override.body.status === 'override_logged', 'override response mismatch');
 
-  const history = await request('/api/auditor/history');
+  const history = await request('/api/auditor/history', {
+    headers: { Authorization: `Bearer ${auditorToken}` },
+  });
   assert(history.ok, 'auditor history failed');
   assert(Array.isArray(history.body.events), 'auditor events missing');
 

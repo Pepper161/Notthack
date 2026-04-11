@@ -22,6 +22,13 @@ import {
   recordVoucherRedeemed,
   recordVoucherRevoked,
 } from "./lib/solana-ledger.js";
+import {
+  login as authLogin,
+  logout as authLogout,
+  requireAuth,
+  requireRole,
+  listAccounts,
+} from "./lib/auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -199,19 +206,56 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get("/api/bootstrap", (_req, res) => {
+app.post("/api/auth/login", (req, res) => {
+  const { email, password } = req.body ?? {};
+  if (!email || !password) {
+    return sendJsonError(res, 400, "email and password are required");
+  }
+
+  const result = authLogin(email, password);
+  if (!result) {
+    return sendJsonError(res, 401, "Invalid email or password");
+  }
+
+  return res.json({
+    ok: true,
+    token: result.token,
+    user: result.user,
+  });
+});
+
+app.post("/api/auth/logout", requireAuth, (req, res) => {
+  const header = req.headers.authorization ?? "";
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : null;
+  authLogout(token);
+  return res.json({ ok: true });
+});
+
+app.get("/api/auth/me", requireAuth, (req, res) => {
+  return res.json({ ok: true, user: req.user });
+});
+
+app.get("/api/auth/accounts", (_req, res) => {
+  return res.json({ ok: true, accounts: listAccounts() });
+});
+
+app.get("/api/bootstrap", requireAuth, (_req, res) => {
   res.json(buildBootstrapPayload());
 });
 
-app.post("/api/reset", (_req, res) => {
+app.post("/api/reset", requireAuth, requireRole("issuer"), (_req, res) => {
   applyDemoReset();
   res.json(buildBootstrapPayload());
 });
 
-app.post("/api/merchant/verify", (req, res) => {
-  const { merchantId, voucherId } = req.body ?? {};
-  if (!merchantId || !voucherId) {
-    return sendJsonError(res, 400, "merchantId and voucherId are required");
+app.post("/api/merchant/verify", requireAuth, requireRole("merchant"), (req, res) => {
+  const { voucherId } = req.body ?? {};
+  const merchantId = req.user.merchantId;
+  if (!voucherId) {
+    return sendJsonError(res, 400, "voucherId is required");
+  }
+  if (!merchantId) {
+    return sendJsonError(res, 403, "Your account is not bound to a merchant");
   }
 
   const result = verifyVoucher({ merchantId, voucherId });
@@ -228,10 +272,14 @@ app.post("/api/merchant/verify", (req, res) => {
   return res.json(payload);
 });
 
-app.post("/api/merchant/redeem", async (req, res) => {
-  const { merchantId, voucherId } = req.body ?? {};
-  if (!merchantId || !voucherId) {
-    return sendJsonError(res, 400, "merchantId and voucherId are required");
+app.post("/api/merchant/redeem", requireAuth, requireRole("merchant"), async (req, res) => {
+  const { voucherId } = req.body ?? {};
+  const merchantId = req.user.merchantId;
+  if (!voucherId) {
+    return sendJsonError(res, 400, "voucherId is required");
+  }
+  if (!merchantId) {
+    return sendJsonError(res, 403, "Your account is not bound to a merchant");
   }
 
   const result = redeemVoucher({ merchantId, voucherId, actorId: merchantId });
@@ -265,8 +313,9 @@ app.post("/api/merchant/redeem", async (req, res) => {
   return res.json(payload);
 });
 
-app.post("/api/issuer/issue", async (req, res) => {
-  const { voucherId, studentId, actorId, note } = req.body ?? {};
+app.post("/api/issuer/issue", requireAuth, requireRole("issuer"), async (req, res) => {
+  const { voucherId, studentId, note } = req.body ?? {};
+  const actorId = req.user.actorId ?? req.user.email ?? "issuer";
   if (!studentId) {
     return sendJsonError(res, 400, "studentId is required");
   }
@@ -296,8 +345,9 @@ app.post("/api/issuer/issue", async (req, res) => {
   }
 });
 
-app.post("/api/issuer/revoke", async (req, res) => {
-  const { voucherId, actorId, reasonCode } = req.body ?? {};
+app.post("/api/issuer/revoke", requireAuth, requireRole("issuer"), async (req, res) => {
+  const { voucherId, reasonCode } = req.body ?? {};
+  const actorId = req.user.actorId ?? req.user.email ?? "issuer";
   if (!voucherId) {
     return sendJsonError(res, 400, "voucherId is required");
   }
@@ -327,8 +377,9 @@ app.post("/api/issuer/revoke", async (req, res) => {
   }
 });
 
-app.post("/api/issuer/override", async (req, res) => {
-  const { voucherId, actorId, overrideReason } = req.body ?? {};
+app.post("/api/issuer/override", requireAuth, requireRole("issuer"), async (req, res) => {
+  const { voucherId, overrideReason } = req.body ?? {};
+  const actorId = req.user.actorId ?? req.user.email ?? "issuer";
   if (!voucherId) {
     return sendJsonError(res, 400, "voucherId is required");
   }
@@ -357,8 +408,17 @@ app.post("/api/issuer/override", async (req, res) => {
   }
 });
 
-app.get("/api/student/:studentId/voucher", (req, res) => {
-  const pass = getStudentPass(req.params.studentId);
+app.get("/api/student/:studentId/voucher", requireAuth, requireRole("student"), (req, res) => {
+  const requested = req.params.studentId;
+  const authStudentId = req.user.studentId;
+  if (!authStudentId) {
+    return sendJsonError(res, 403, "Your account is not bound to a student record");
+  }
+  if (requested !== "me" && requested !== authStudentId) {
+    return sendJsonError(res, 403, "You may only view your own voucher");
+  }
+
+  const pass = getStudentPass(authStudentId);
   if (!pass) {
     return sendJsonError(res, 404, "No voucher found for student", { status: "unknown_voucher" });
   }
@@ -375,8 +435,12 @@ app.get("/api/student/:studentId/voucher", (req, res) => {
   });
 });
 
-app.get("/api/student/:voucherId", (req, res) => {
+app.get("/api/student/:voucherId", requireAuth, (req, res) => {
   const state = getState();
+  const rawVoucher = state.vouchers[req.params.voucherId];
+  if (req.user.role === "student" && rawVoucher && rawVoucher.studentId !== req.user.studentId) {
+    return sendJsonError(res, 403, "You may only view your own voucher");
+  }
   const voucher = getVoucher(req.params.voucherId);
   if (!voucher) {
     return sendJsonError(res, 404, "unknown_voucher", { status: "unknown_voucher" });
@@ -394,7 +458,7 @@ app.get("/api/student/:voucherId", (req, res) => {
   });
 });
 
-app.get("/api/vouchers/:voucherId/history", (req, res) => {
+app.get("/api/vouchers/:voucherId/history", requireAuth, requireRole("issuer", "auditor"), (req, res) => {
   const state = getState();
   const voucher = state.vouchers[req.params.voucherId];
   if (!voucher) {
@@ -408,7 +472,11 @@ app.get("/api/vouchers/:voucherId/history", (req, res) => {
   });
 });
 
-app.get(/^\/api\/vouchers\/([^/]+)\/history$/, (req, res) => {
+app.get(
+  /^\/api\/vouchers\/([^/]+)\/history$/,
+  requireAuth,
+  requireRole("issuer", "auditor"),
+  (req, res) => {
   const voucherId = req.params[0];
   const state = getState();
   const voucher = state.vouchers[voucherId];
@@ -420,32 +488,41 @@ app.get(/^\/api\/vouchers\/([^/]+)\/history$/, (req, res) => {
     voucher: getVoucher(voucherId),
     raw: voucher,
   });
-});
+  },
+);
 
-app.get("/api/audit/history", (_req, res) => {
+app.get("/api/audit/history", requireAuth, requireRole("issuer", "auditor"), (_req, res) => {
   res.json({
     ok: true,
     events: getAuditHistory().map(serializeAuditEvent).reverse(),
   });
 });
 
-app.get("/api/students/:studentId/pass", (req, res) => {
-  const pass = getStudentPass(req.params.studentId);
+app.get("/api/students/:studentId/pass", requireAuth, (req, res) => {
+  if (req.user.role === "student" && req.params.studentId !== req.user.studentId && req.params.studentId !== "me") {
+    return sendJsonError(res, 403, "You may only view your own pass");
+  }
+  const lookupId = req.params.studentId === "me" ? req.user.studentId : req.params.studentId;
+  const pass = getStudentPass(lookupId);
   if (!pass) {
     return sendJsonError(res, 404, "Student pass not found");
   }
   return res.json({ ok: true, pass });
 });
 
-app.get("/api/students/:studentId/pass.svg", async (req, res) => {
-  const pass = getStudentPass(req.params.studentId);
+app.get("/api/students/:studentId/pass.svg", requireAuth, async (req, res) => {
+  if (req.user.role === "student" && req.params.studentId !== req.user.studentId && req.params.studentId !== "me") {
+    return sendJsonError(res, 403, "You may only view your own pass");
+  }
+  const lookupId = req.params.studentId === "me" ? req.user.studentId : req.params.studentId;
+  const pass = getStudentPass(lookupId);
   if (!pass) {
     return sendJsonError(res, 404, "Student pass not found");
   }
   return sendPassSvg(res, pass.qrPayload);
 });
 
-app.get("/api/vouchers/:voucherId/pass", (req, res) => {
+app.get("/api/vouchers/:voucherId/pass", requireAuth, (req, res) => {
   const state = getState();
   const voucher = getVoucher(req.params.voucherId);
   if (!voucher) {
@@ -471,7 +548,7 @@ app.get("/api/vouchers/:voucherId/pass", (req, res) => {
   });
 });
 
-app.get("/api/vouchers/:voucherId/pass.svg", async (req, res) => {
+app.get("/api/vouchers/:voucherId/pass.svg", requireAuth, async (req, res) => {
   const voucher = getVoucher(req.params.voucherId);
   if (!voucher) {
     return sendJsonError(res, 404, "Voucher not found");
@@ -488,14 +565,14 @@ app.get("/api/vouchers/:voucherId/pass.svg", async (req, res) => {
   return sendPassSvg(res, payload);
 });
 
-app.get("/api/auditor/history", (_req, res) => {
+app.get("/api/auditor/history", requireAuth, requireRole("auditor"), (_req, res) => {
   res.json({
     ok: true,
     events: getAuditHistory().map(serializeAuditEvent).reverse(),
   });
 });
 
-app.get("/api/solana/status", (_req, res) => {
+app.get("/api/solana/status", requireAuth, (_req, res) => {
   res.json(getLedgerStatus());
 });
 
