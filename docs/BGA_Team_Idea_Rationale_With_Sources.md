@@ -1,7 +1,7 @@
 # BGA Idea Rationale With Sources
 
 ## Executive Summary
-Our current concept is a **university hardship meal voucher MVP**.
+Our current concept is a **university hardship support credential MVP**.
 It is designed as a **pilotable version of a broader real-world aid and benefit delivery problem**:
 multiple parties need to trust the same redemption and revocation state, but records are often fragmented.
 
@@ -45,7 +45,7 @@ We are not copying Rahat, but it helps validate that the underlying design space
 Source:
 - https://rumsan.com/portfolio/rahat
 
-## 2. Why a university meal voucher is a good pilot context
+## 2. Why a university hardship support workflow is a good pilot context
 We chose the university context because it is easier to explain, safer to demo, and more concrete than a broad NGO platform.
 
 It gives us four clear actors:
@@ -62,11 +62,11 @@ An eligible student needs quick access to meal support without learning crypto o
 They should just present a QR code and get a yes/no answer fast.
 
 ### Merchant story
-A cashier needs to know whether a voucher is valid **right now**.
-They should not read hardship reasons, access student records, or guess whether a voucher was already used elsewhere.
+A cashier needs to know whether a support credential is valid **right now**.
+They should not read hardship reasons, access student records, or guess whether the same QR was already redeemed at another cafeteria.
 
 ### Issuer story
-Student Affairs makes the eligibility decision before issuance and can later revoke a voucher if needed.
+Student Affairs makes the eligibility decision before issuance and can later revoke a support credential if needed.
 They need confidence that revocation and redemption status are consistently enforced downstream.
 
 ### Auditor story
@@ -88,7 +88,7 @@ Our framing is different:
 That is why the core product claim is:
 
 > We are not building a general aid platform.
-> We are building the minimum shared trust state for a university hardship meal voucher workflow.
+> We are building the minimum shared trust state for a university hardship support workflow.
 
 ## 4. Exactly what blockchain does here
 Blockchain is used only for:
@@ -115,7 +115,7 @@ That is weak exactly in the cases that matter most:
 
 - disputed redemption
 - revoked voucher misuse
-- duplicate redemption claims
+- cross-merchant duplicate redemption claims
 - manual exception handling
 - audit and reconciliation
 
@@ -125,6 +125,12 @@ A shared ledger is useful here because it gives the program a **common state che
 Use this wording:
 
 > Our idea is a wallet-free hardship meal voucher system for one university.
+> The student just shows a QR code.
+> The real product is the trust layer underneath: Student Affairs, cafeteria staff, and auditors all need a shared, tamper-resistant view of redemption and revocation status, while keeping eligibility details and personal data off-chain.
+
+Recommended tighter wording:
+
+> Our idea is a wallet-free support credential system for one university hardship program.
 > The student just shows a QR code.
 > The real product is the trust layer underneath: Student Affairs, cafeteria staff, and auditors all need a shared, tamper-resistant view of redemption and revocation status, while keeping eligibility details and personal data off-chain.
 

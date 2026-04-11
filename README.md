@@ -4,7 +4,7 @@
 
 This repository contains a judge-ready local demo for the BGA Track at NottsHack:
 
-- a wallet-free QR meal voucher for one university hardship support program
+- a wallet-free QR benefit flow for one university hardship support program
 - an issuer flow for Student Affairs
 - a merchant verify and redeem flow for approved campus cafeterias
 - an auditor-visible history of meaningful events
@@ -19,7 +19,7 @@ This is **not** a general voucher platform and **not** a crypto onboarding produ
 It is a **shared trust layer** for one narrow workflow:
 
 - Student Affairs decides eligibility off-chain
-- a student receives a QR-based meal voucher
+- a student receives a QR-based support credential
 - a cafeteria cashier verifies and redeems it
 - an auditor can inspect issued, redeemed, blocked, revoked, and override events
 
@@ -31,9 +31,9 @@ The project is built around one practical coordination problem:
 
 - issuers, merchants, and auditors all depend on the same redemption and revocation state
 - those records are often fragmented across separate systems
-- that creates duplicate-redemption risk, revoked-voucher misuse, and weak auditability
+- that creates cross-merchant duplicate-redemption risk, revoked-voucher misuse, and weak auditability
 
-This repo uses a university hardship meal voucher as a **pilotable deployment context** for that broader benefit-delivery trust problem.
+This repo uses a university hardship support workflow as a **pilotable deployment context** for that broader benefit-delivery trust problem.
 
 ## Why Blockchain Here
 
@@ -72,7 +72,7 @@ The local demo supports:
 2. wallet-free student QR presentation
 3. merchant verify
 4. merchant redeem
-5. duplicate redemption block
+5. cross-merchant duplicate redemption block
 6. revoked voucher block
 7. unauthorized merchant block
 8. auditor visibility into meaningful history
@@ -120,9 +120,9 @@ Use the app in this order:
 
 1. Open the issuer panel and keep or issue a voucher for a seeded student.
 2. Show the student QR pass.
-3. On the merchant panel, verify `VCH-1001`.
-4. Redeem `VCH-1001` successfully.
-5. Try redeeming the same voucher again and show the duplicate-redemption block.
+3. On the merchant panel, use `CAF-A` to verify and redeem `VCH-1001`.
+4. Switch to `CAF-B` and try the same voucher again.
+5. Show the cross-merchant duplicate-redemption block.
 6. Optionally verify a revoked voucher or an unauthorized merchant.
 7. Open the auditor panel and show the shared history.
 
@@ -170,4 +170,4 @@ Deferred on purpose:
 If you are presenting this project, use this framing:
 
 > This is not a voucher app on blockchain.
-> It is a minimal shared trust layer for redemption, revocation, and audit state in one university hardship meal support workflow.
+> It is a minimal shared trust layer for redemption, revocation, and audit state in one university hardship support workflow.

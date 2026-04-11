@@ -1,13 +1,13 @@
 # BGA Track Team Share
 
 ## 1. What we are building
-We are building a **wallet-free QR meal voucher trust layer** for **one university hardship meal support program**.
+We are building a **wallet-free QR support credential trust layer** for **one university hardship support program**.
 
 The goal is not to build a general aid platform or a crypto product.
 The goal is to solve one narrow but important trust problem:
 
-- Student Affairs decides eligibility and issues or revokes vouchers
-- Campus cafeterias need to quickly verify whether a voucher is valid
+- Student Affairs decides eligibility and issues or revokes support credentials
+- Campus cafeterias need to quickly verify whether a credential is valid
 - Auditors need a reliable history of what was issued, redeemed, blocked, revoked, or manually overridden
 
 In our MVP, the student just shows a QR code.
@@ -17,14 +17,14 @@ No wallet, no token management, no crypto knowledge.
 In benefit and voucher programs, the most fragile part is often not the UI.
 It is the **shared state** between multiple parties:
 
-- Is this voucher still active?
-- Has it already been redeemed?
+- Is this credential still active?
+- Has it already been redeemed elsewhere?
 - Was it revoked?
 - Can we prove later who changed what and when?
 
 If these records are fragmented across issuer systems, merchant systems, and audit logs, teams get:
 
-- duplicate redemption risk
+- cross-merchant duplicate redemption risk
 - revoked voucher misuse
 - inconsistent records across departments
 - expensive or weak audits
@@ -74,7 +74,7 @@ Our local demo already focuses on the core path:
 2. wallet-free student QR presentation
 3. merchant verify
 4. merchant redeem
-5. duplicate redemption blocked
+5. cross-merchant duplicate redemption blocked
 6. revoked voucher blocked
 7. unauthorized merchant blocked
 8. auditor sees meaningful history
@@ -94,4 +94,4 @@ These are the main public references supporting the broader problem:
   https://rumsan.com/portfolio/rahat
 
 ## 8. One-sentence summary
-We are building a wallet-free university meal voucher system that keeps personal data off-chain, while using blockchain only for the shared redemption, revocation, and audit state that issuers, merchants, and auditors all need to trust.
+We are building a wallet-free university support credential system that keeps personal data off-chain, while using blockchain only for the shared redemption, revocation, and audit state that issuers, merchants, and auditors all need to trust.

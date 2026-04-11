@@ -2,22 +2,22 @@
 
 ## Slide 1 — Problem
 
-- University hardship meal support is hard to administer cleanly across Student Affairs, merchants, and auditors
-- Duplicate redemption, stale eligibility, and reconciliation friction create trust problems
-- The current workflow is operationally fragile, not just inconvenient
+- University hardship meal support involves Student Affairs, merchants, and auditors
+- The weak point is not voucher creation, but trusted redemption and revocation state
+- The workflow becomes fragile when each actor depends on separate records
 
-## Slide 2 — Who Suffers
+## Slide 2 — Without Shared State
+
+- Same QR is shown at Cafeteria A and Cafeteria B
+- One office log is updated later, but merchants act in real time
+- Auditors see reconciliation work, not one neutral event trail
+
+## Slide 3 — Who Suffers
 
 - Student Affairs staff who issue and revoke support
 - Campus cafeteria cashiers who need a fast yes/no answer
 - Auditors who need a reliable history
 - Eligible students who should not be forced through crypto UX
-
-## Slide 3 — Why Current Workflow Fails
-
-- Eligibility decisions live in one place, but redemption happens in another
-- Editable lists and manual reconciliation create dispute risk
-- A single department-owned log is not a neutral shared record
 
 ## Slide 4 — Solution
 
@@ -28,34 +28,39 @@
 
 ## Slide 5 — Why Blockchain Here
 
-- Multiple semi-trusted actors need the same redemption state
-- Revocation and duplicate redemption are the trust problem
-- Off-chain data stays private; on-chain state stays minimal
+- This is not about storing more data
+- It is about preventing disputes between independent actors
+- Off-chain data stays private; shared trust state stays minimal and append-only
 
 ## Slide 6 — Demo
 
-- Issue or reuse seeded voucher
-- Student presents QR pass
-- Merchant verifies and redeems
-- Duplicate redemption is blocked
-- Auditor sees the meaningful history
+- Student presents one QR pass
+- Cafeteria A redeems it successfully
+- Cafeteria B tries the same QR seconds later and is blocked
+- Auditor sees the same event trail immediately
 
-## Slide 7 — Deployment Path
+## Slide 7 — Pilot Path
 
 - Pilot one campus with Student Affairs and 1–2 cafeterias
 - Keep eligibility off-chain and staff-owned
-- Expand only after the voucher trust model proves itself
+- Start with a web verify screen, not POS integration
 
-## Slide 8 — Responsible Design
+## Slide 8 — Broader Impact
+
+- Same trust pattern can support scholarships
+- Same trust pattern can support emergency aid
+- Same trust pattern can support NGO food distribution
+- Same trust pattern can support disaster relief
+
+## Slide 9 — Responsible Design
 
 - No wallet required
 - Personal data off-chain
 - Manual override is human-controlled and logged
 - Offline, biometrics, and complex integrations are out of scope
 
-## Slide 9 — Closing
+## Slide 10 — Closing
 
 - This is a shared trust layer, not a voucher app
 - The team proved the minimum viable trust state
 - Ask: pilot this with one university program
-
