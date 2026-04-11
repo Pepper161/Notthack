@@ -206,7 +206,7 @@ async function sendPassSvg(res, qrPayload) {
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
-    service: "nourishchain-api",
+    service: "bga-university-hardship-voucher-demo",
   });
 });
 
@@ -596,7 +596,7 @@ app.get("/", (_req, res) => {
 
   return res.json({
     ok: true,
-    service: "nourishchain-api",
+    service: "bga-university-hardship-voucher-demo",
     mode: "api_only",
     ui: {
       primary: "mealtrust_app",

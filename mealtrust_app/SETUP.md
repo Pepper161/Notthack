@@ -1,4 +1,4 @@
-# NourishChain Flutter App — Setup Guide
+# MealTrust Flutter App — Setup Guide
 
 ## 1. Prerequisites
 
@@ -34,7 +34,7 @@ defaultConfig {
 Add to `ios/Runner/Info.plist`:
 ```xml
 <key>NSCameraUsageDescription</key>
-<string>NourishChain needs camera access to scan QR codes.</string>
+<string>MealTrust needs camera access to scan QR codes.</string>
 ```
 
 ## 5. Run the app

@@ -257,10 +257,3 @@ Deferred:
   1. `cd mealtrust_app && flutter build web`
   2. `npm start`
   3. open `http://localhost:3000`
-
-## Current Branding Note
-
-- outward-facing product name is now `NourishChain`
-- internal identifiers remain unchanged for now where renaming would create avoidable integration risk:
-  - `mealtrust_app/`
-  - `mealtrust_state`

@@ -2,9 +2,9 @@
   "meta": {
     "programId": "meal-support-2026",
     "programName": "University Hardship Meal Support",
-    "seededAt": "2026-04-08T15:08:44.235Z",
-    "lastUpdatedAt": "2026-04-08T15:08:44.292Z",
-    "nextEventSeq": 9
+    "seededAt": "2026-04-11T17:22:02.639Z",
+    "lastUpdatedAt": "2026-04-11T17:24:46.504Z",
+    "nextEventSeq": 6
   },
   "students": {
     "STU-1001": {
@@ -15,7 +15,7 @@
     "STU-1002": {
       "studentId": "STU-1002",
       "displayName": "Ravi M.",
-      "status": "eligible"
+      "status": "not_issued"
     }
   },
   "merchants": {
@@ -43,33 +43,19 @@
       "displayLabel": "Meal Support Voucher",
       "amountLabel": "1 meal",
       "statusOffchain": "issued",
-      "issuedAt": "2026-04-08T15:08:44.235Z",
+      "issuedAt": "2026-04-11T17:22:02.639Z",
       "revokedAt": null,
-      "redeemedAt": "2026-04-08T15:08:44.265Z",
+      "redeemedAt": "2026-04-11T17:22:02.763Z",
       "revokedBy": null,
       "redeemedBy": "CAF-A",
       "redemptionCheckpointId": "chk-0001",
       "manualOverrideEvents": [],
-      "blockedRedemptions": [
-        {
-          "eventId": "blk-0003",
-          "voucherId": "VCH-1001",
-          "type": "voucher_redemption_blocked",
-          "at": "2026-04-08T15:08:44.272Z",
-          "actorType": "merchant",
-          "actorId": "CAF-A",
-          "blockedReason": "already_redeemed",
-          "reason": "Voucher already redeemed",
-          "checkpointId": null,
-          "relatedCheckpointId": "chk-0001",
-          "details": null
-        }
-      ],
+      "blockedRedemptions": [],
       "auditTrail": [
         {
           "eventId": "evt-seed-issued",
           "type": "voucher_issued",
-          "at": "2026-04-08T15:08:44.235Z",
+          "at": "2026-04-11T17:22:02.639Z",
           "actorType": "seed",
           "actorId": "system",
           "checkpointId": null,
@@ -79,7 +65,7 @@
           "eventId": "evt-0002",
           "voucherId": "VCH-1001",
           "type": "voucher_redeemed",
-          "at": "2026-04-08T15:08:44.265Z",
+          "at": "2026-04-11T17:22:02.763Z",
           "actorType": "merchant",
           "actorId": "CAF-A",
           "reason": null,
@@ -96,12 +82,12 @@
         "isRevoked": false,
         "isRedeemed": true,
         "lastEventType": "voucher_redeemed",
-        "lastEventAt": "2026-04-08T15:08:44.265Z",
+        "lastEventAt": "2026-04-11T17:22:02.763Z",
         "checkpoints": [
           {
             "checkpointId": "chk-0001",
             "type": "voucher_redeemed",
-            "at": "2026-04-08T15:08:44.265Z",
+            "at": "2026-04-11T17:22:02.763Z",
             "actorType": "merchant",
             "actorId": "CAF-A",
             "voucherId": "VCH-1001",
@@ -119,136 +105,70 @@
       "displayLabel": "Meal Support Voucher",
       "amountLabel": "1 meal",
       "statusOffchain": "issued",
-      "issuedAt": "2026-04-08T15:08:44.235Z",
+      "issuedAt": "2026-04-11T17:22:02.639Z",
       "revokedAt": null,
-      "redeemedAt": null,
+      "redeemedAt": "2026-04-11T17:24:21.680Z",
       "revokedBy": null,
-      "redeemedBy": null,
-      "redemptionCheckpointId": null,
+      "redeemedBy": "CAF-A",
+      "redemptionCheckpointId": "chk-0003",
       "manualOverrideEvents": [],
-      "blockedRedemptions": [],
+      "blockedRedemptions": [
+        {
+          "eventId": "blk-0005",
+          "voucherId": "VCH-1002",
+          "type": "voucher_redemption_blocked",
+          "at": "2026-04-11T17:24:46.504Z",
+          "actorType": "merchant",
+          "actorId": "CAF-A",
+          "blockedReason": "already_redeemed",
+          "reason": "Voucher already redeemed",
+          "checkpointId": null,
+          "relatedCheckpointId": "chk-0003",
+          "details": null
+        }
+      ],
       "auditTrail": [
         {
           "eventId": "evt-seed-issued-2",
           "type": "voucher_issued",
-          "at": "2026-04-08T15:08:44.235Z",
+          "at": "2026-04-11T17:22:02.639Z",
           "actorType": "seed",
           "actorId": "system",
           "checkpointId": null,
           "note": "Seeded demo voucher"
+        },
+        {
+          "eventId": "evt-0004",
+          "voucherId": "VCH-1002",
+          "type": "voucher_redeemed",
+          "at": "2026-04-11T17:24:21.680Z",
+          "actorType": "merchant",
+          "actorId": "CAF-A",
+          "reason": null,
+          "note": null,
+          "checkpointId": "chk-0003",
+          "relatedCheckpointId": null,
+          "relatedOnChainEventId": "chk-0003",
+          "overrideEventHash": null,
+          "details": null
         }
       ],
       "onChain": {
         "voucherHash": null,
         "isRevoked": false,
-        "isRedeemed": false,
-        "lastEventType": null,
-        "lastEventAt": null,
-        "checkpoints": []
-      }
-    },
-    "VCH-1003": {
-      "voucherId": "VCH-1003",
-      "studentId": "STU-1002",
-      "programId": "meal-support-2026",
-      "displayLabel": "Meal Support Voucher",
-      "amountLabel": "1 meal",
-      "statusOffchain": "revoked",
-      "issuedAt": "2026-04-08T15:08:44.276Z",
-      "revokedAt": "2026-04-08T15:08:44.281Z",
-      "redeemedAt": null,
-      "revokedBy": "staff",
-      "redeemedBy": null,
-      "redemptionCheckpointId": null,
-      "manualOverrideEvents": [
-        {
-          "at": "2026-04-08T15:08:44.292Z",
-          "actorId": "staff",
-          "reason": "manual review approved replacement process",
-          "overrideEventHash": "eyJ2b3VjaGVySWQiOiJWQ0gtMTAwMyIsImFjdG9ySWQiOiJzdGFmZiIsInJlYXNvbiI6Im1hbnVhbCByZXZpZXcgYXBwcm92ZWQgcmVwbGFjZW1lbnQgcHJvY2VzcyIsImF0IjoiMjAyNi0wNC0wOFQxNTowODo0NC4yOTJaIn0",
-          "checkpointId": "chk-0007"
-        }
-      ],
-      "blockedRedemptions": [],
-      "auditTrail": [
-        {
-          "eventId": "evt-0004",
-          "voucherId": "VCH-1003",
-          "type": "voucher_issued",
-          "at": "2026-04-08T15:08:44.276Z",
-          "actorType": "issuer",
-          "actorId": "staff",
-          "reason": null,
-          "note": "Issued by Student Affairs",
-          "checkpointId": null,
-          "relatedCheckpointId": null,
-          "relatedOnChainEventId": null,
-          "overrideEventHash": null,
-          "details": {
-            "studentId": "STU-1002"
-          }
-        },
-        {
-          "eventId": "evt-0006",
-          "voucherId": "VCH-1003",
-          "type": "voucher_revoked",
-          "at": "2026-04-08T15:08:44.281Z",
-          "actorType": "issuer",
-          "actorId": "staff",
-          "reason": "admin_test_revoke",
-          "note": null,
-          "checkpointId": "chk-0005",
-          "relatedCheckpointId": null,
-          "relatedOnChainEventId": null,
-          "overrideEventHash": null,
-          "details": null
-        },
-        {
-          "eventId": "evt-0008",
-          "voucherId": "VCH-1003",
-          "type": "override_logged",
-          "at": "2026-04-08T15:08:44.292Z",
-          "actorType": "issuer",
-          "actorId": "staff",
-          "reason": "manual review approved replacement process",
-          "note": null,
-          "checkpointId": "chk-0007",
-          "relatedCheckpointId": null,
-          "relatedOnChainEventId": null,
-          "overrideEventHash": "eyJ2b3VjaGVySWQiOiJWQ0gtMTAwMyIsImFjdG9ySWQiOiJzdGFmZiIsInJlYXNvbiI6Im1hbnVhbCByZXZpZXcgYXBwcm92ZWQgcmVwbGFjZW1lbnQgcHJvY2VzcyIsImF0IjoiMjAyNi0wNC0wOFQxNTowODo0NC4yOTJaIn0",
-          "details": {
-            "reason": "manual review approved replacement process"
-          }
-        }
-      ],
-      "onChain": {
-        "voucherHash": "eyJ2b3VjaGVySWQiOiJWQ0gtMTAwMyIsInN0dWRlbnRJZCI6IlNUVS0xMDAyIiwicHJvZ3JhbUlkIjoibWVhbC1zdXBwb3J0LTIwMjYifQ",
-        "isRevoked": true,
-        "isRedeemed": false,
-        "lastEventType": "override_logged",
-        "lastEventAt": "2026-04-08T15:08:44.292Z",
+        "isRedeemed": true,
+        "lastEventType": "voucher_redeemed",
+        "lastEventAt": "2026-04-11T17:24:21.680Z",
         "checkpoints": [
           {
-            "checkpointId": "chk-0005",
-            "type": "voucher_revoked",
-            "at": "2026-04-08T15:08:44.281Z",
-            "actorType": "issuer",
-            "actorId": "staff",
-            "voucherId": "VCH-1003",
+            "checkpointId": "chk-0003",
+            "type": "voucher_redeemed",
+            "at": "2026-04-11T17:24:21.680Z",
+            "actorType": "merchant",
+            "actorId": "CAF-A",
+            "voucherId": "VCH-1002",
             "details": {
-              "reason": "admin_test_revoke"
-            }
-          },
-          {
-            "checkpointId": "chk-0007",
-            "type": "override_logged",
-            "at": "2026-04-08T15:08:44.292Z",
-            "actorType": "issuer",
-            "actorId": "staff",
-            "voucherId": "VCH-1003",
-            "details": {
-              "reason": "manual review approved replacement process",
-              "overrideEventHash": "eyJ2b3VjaGVySWQiOiJWQ0gtMTAwMyIsImFjdG9ySWQiOiJzdGFmZiIsInJlYXNvbiI6Im1hbnVhbCByZXZpZXcgYXBwcm92ZWQgcmVwbGFjZW1lbnQgcHJvY2VzcyIsImF0IjoiMjAyNi0wNC0wOFQxNTowODo0NC4yOTJaIn0"
+              "merchantId": "CAF-A"
             }
           }
         ]
@@ -260,7 +180,7 @@
       "eventId": "evt-0002",
       "voucherId": "VCH-1001",
       "type": "voucher_redeemed",
-      "at": "2026-04-08T15:08:44.265Z",
+      "at": "2026-04-11T17:22:02.763Z",
       "actorType": "merchant",
       "actorId": "CAF-A",
       "reason": null,
@@ -272,66 +192,32 @@
       "details": null
     },
     {
-      "eventId": "blk-0003",
-      "voucherId": "VCH-1001",
+      "eventId": "evt-0004",
+      "voucherId": "VCH-1002",
+      "type": "voucher_redeemed",
+      "at": "2026-04-11T17:24:21.680Z",
+      "actorType": "merchant",
+      "actorId": "CAF-A",
+      "reason": null,
+      "note": null,
+      "checkpointId": "chk-0003",
+      "relatedCheckpointId": null,
+      "relatedOnChainEventId": "chk-0003",
+      "overrideEventHash": null,
+      "details": null
+    },
+    {
+      "eventId": "blk-0005",
+      "voucherId": "VCH-1002",
       "type": "voucher_redemption_blocked",
-      "at": "2026-04-08T15:08:44.272Z",
+      "at": "2026-04-11T17:24:46.504Z",
       "actorType": "merchant",
       "actorId": "CAF-A",
       "blockedReason": "already_redeemed",
       "reason": "Voucher already redeemed",
       "checkpointId": null,
-      "relatedCheckpointId": "chk-0001",
+      "relatedCheckpointId": "chk-0003",
       "details": null
-    },
-    {
-      "eventId": "evt-0004",
-      "voucherId": "VCH-1003",
-      "type": "voucher_issued",
-      "at": "2026-04-08T15:08:44.276Z",
-      "actorType": "issuer",
-      "actorId": "staff",
-      "reason": null,
-      "note": "Issued by Student Affairs",
-      "checkpointId": null,
-      "relatedCheckpointId": null,
-      "relatedOnChainEventId": null,
-      "overrideEventHash": null,
-      "details": {
-        "studentId": "STU-1002"
-      }
-    },
-    {
-      "eventId": "evt-0006",
-      "voucherId": "VCH-1003",
-      "type": "voucher_revoked",
-      "at": "2026-04-08T15:08:44.281Z",
-      "actorType": "issuer",
-      "actorId": "staff",
-      "reason": "admin_test_revoke",
-      "note": null,
-      "checkpointId": "chk-0005",
-      "relatedCheckpointId": null,
-      "relatedOnChainEventId": null,
-      "overrideEventHash": null,
-      "details": null
-    },
-    {
-      "eventId": "evt-0008",
-      "voucherId": "VCH-1003",
-      "type": "override_logged",
-      "at": "2026-04-08T15:08:44.292Z",
-      "actorType": "issuer",
-      "actorId": "staff",
-      "reason": "manual review approved replacement process",
-      "note": null,
-      "checkpointId": "chk-0007",
-      "relatedCheckpointId": null,
-      "relatedOnChainEventId": null,
-      "overrideEventHash": "eyJ2b3VjaGVySWQiOiJWQ0gtMTAwMyIsImFjdG9ySWQiOiJzdGFmZiIsInJlYXNvbiI6Im1hbnVhbCByZXZpZXcgYXBwcm92ZWQgcmVwbGFjZW1lbnQgcHJvY2VzcyIsImF0IjoiMjAyNi0wNC0wOFQxNTowODo0NC4yOTJaIn0",
-      "details": {
-        "reason": "manual review approved replacement process"
-      }
     }
   ]
 }

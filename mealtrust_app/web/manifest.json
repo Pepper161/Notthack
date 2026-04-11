@@ -1,11 +1,11 @@
 {
-    "name": "NourishChain",
-    "short_name": "NourishChain",
+    "name": "mealtrust",
+    "short_name": "mealtrust",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Wallet-free university benefit redemption trust layer.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
