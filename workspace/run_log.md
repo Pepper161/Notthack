@@ -396,3 +396,29 @@ Why it can lose:
 - updated `README.md` to note that Windows PowerShell users can use `npm run demo` if GNU `make` is unavailable
 - result:
   - the repository now has both a WSL-friendly `make demo` path and a Windows-friendly `npm run demo` path
+
+## 2026-04-12 Switch-Style Frontend Rewrite
+
+- rewrote the Flutter `HomeScreen` into a responsive editor-style shell with:
+  - a desktop left rail
+  - a top status bar
+  - a role-driven switchboard
+  - responsive bottom navigation on narrow screens
+- updated the Flutter theme to use Google Fonts for a more distinct editorial look
+- added `google_fonts`, `lucide_icons`, and `animations` to the Flutter app dependencies
+- kept the backend API contract intact while replacing the visible frontend shell
+- validation:
+  - `npm run build:web`
+- result:
+  - the UI now has a visibly different structure and a stronger role-switching surface
+  - backend connectivity remains isolated from presentation changes
+
+## 2026-04-12 Web API Origin Alignment
+
+- changed the Flutter web API base URL to derive from `Uri.base.origin` instead of hardcoding `http://localhost:3000/api`
+- result:
+  - the built web app now follows the origin it was served from, which is more robust for `localhost:3000` and `/admin`
+  - backend connectivity is less brittle when the app is served by the Node backend from the built Flutter web bundle
+- validation:
+  - `flutter build web`
+  - `flutter analyze` (info-only findings remain)

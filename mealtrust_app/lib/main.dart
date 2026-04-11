@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 import 'widgets/nourish_components.dart';
 
@@ -22,6 +23,10 @@ class NourishChainApp extends StatelessWidget {
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: NourishColors.cream,
+        textTheme: GoogleFonts.manropeTextTheme().apply(
+          bodyColor: NourishColors.ink,
+          displayColor: NourishColors.ink,
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           foregroundColor: NourishColors.ink,
@@ -35,18 +40,6 @@ class NourishChainApp extends StatelessWidget {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
-          ),
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: NourishColors.ink),
-          bodySmall: TextStyle(color: NourishColors.slate),
-          titleLarge: TextStyle(
-            color: NourishColors.ink,
-            fontWeight: FontWeight.w800,
-          ),
-          titleMedium: TextStyle(
-            color: NourishColors.ink,
-            fontWeight: FontWeight.w700,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(

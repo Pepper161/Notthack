@@ -256,10 +256,10 @@ class _IssuerScreenState extends State<IssuerScreen>
           borderColor: const Color(0x263D6DE1),
         ),
       ],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          NourishHeaderPanel(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 1020;
+          final hero = NourishHeaderPanel(
             roleLabel: 'Student Affairs',
             headline: 'Issue support, revoke eligibility, and log override decisions.',
             body:
@@ -286,34 +286,157 @@ class _IssuerScreenState extends State<IssuerScreen>
             ],
             trailing: const Icon(Icons.admin_panel_settings,
                 color: Colors.white, size: 38),
-          ),
-          const SizedBox(height: 18),
-          if (_message != null) ...[
-            _messageBanner(),
-            const SizedBox(height: 16),
-          ],
-          TabBar(
-            controller: _tabs,
-            labelColor: NourishColors.ink,
-            unselectedLabelColor: NourishColors.slate,
-            indicatorColor: NourishColors.green,
-            tabs: const [
-              Tab(text: 'Issue Voucher'),
-              Tab(text: 'Manage Vouchers'),
+          );
+
+          final main = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_message != null) ...[
+                _messageBanner(),
+                const SizedBox(height: 16),
+              ],
+              TabBar(
+                controller: _tabs,
+                labelColor: NourishColors.ink,
+                unselectedLabelColor: NourishColors.slate,
+                indicatorColor: NourishColors.green,
+                tabs: const [
+                  Tab(text: 'Issue Voucher'),
+                  Tab(text: 'Manage Vouchers'),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: wide ? 620 : 700,
+                child: TabBarView(
+                  controller: _tabs,
+                  children: [
+                    _buildIssueTab(),
+                    _buildManageTab(),
+                  ],
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 560,
-            child: TabBarView(
-              controller: _tabs,
+          );
+
+          final sidebar = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const NourishSectionTitle(
+                title: 'Issuer dashboard',
+                subtitle: 'Operational controls, demo reset, and ledger summary.',
+              ),
+              const SizedBox(height: 12),
+              NourishStatusCard(
+                title: 'Issuer stance',
+                body:
+                    'Student Affairs issues the voucher, revokes it when eligibility changes, and logs manual overrides as distinct audited events.',
+                icon: Icons.admin_panel_settings,
+                accent: NourishColors.blue,
+                trailing: OutlinedButton(
+                  onPressed: _resetting ? null : _resetDemo,
+                  child: Text(_resetting ? 'Resetting...' : 'Reset demo'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              NourishActionCard(
+                title: 'What this screen controls',
+                body:
+                    'This is the only place where issuance, revocation, and remediation are initiated. Everything else is downstream of these actions.',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    _MiniRoleLine(label: 'Issue', value: 'Create seeded or new student voucher'),
+                    _MiniRoleLine(label: 'Revoke', value: 'Cut off eligibility before redemption'),
+                    _MiniRoleLine(label: 'Override', value: 'Log one-time manual review decisions'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              NourishActionCard(
+                title: 'Live totals',
+                body: 'These counts update from the seeded backend state.',
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    SizedBox(
+                      width: 150,
+                      child: NourishMetricCard(
+                        label: 'Active',
+                        value: '$activeCount',
+                        accent: NourishColors.green,
+                        icon: Icons.check_circle_outline,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 150,
+                      child: NourishMetricCard(
+                        label: 'Redeemed',
+                        value: '$redeemedCount',
+                        accent: NourishColors.blue,
+                        icon: Icons.done_all,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 150,
+                      child: NourishMetricCard(
+                        label: 'Revoked',
+                        value: '$revokedCount',
+                        accent: Colors.red,
+                        icon: Icons.cancel_outlined,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+
+          if (wide) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildIssueTab(),
-                _buildManageTab(),
+                Expanded(
+                  flex: 5,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        hero,
+                        const SizedBox(height: 18),
+                        main,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: 360,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: sidebar,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                hero,
+                const SizedBox(height: 16),
+                sidebar,
+                const SizedBox(height: 16),
+                main,
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -367,63 +490,118 @@ class _IssuerScreenState extends State<IssuerScreen>
   }
 
   Widget _buildIssueTab() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          NourishActionCard(
-            title: 'Issue a new meal voucher',
-            body:
-                'Eligibility is decided before issuance. The voucher is then available to the student as a wallet-free QR pass.',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _studentIdController,
-                  decoration: const InputDecoration(
-                    labelText: 'Student ID',
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _issueVoucher(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= 900;
+        final form = NourishActionCard(
+          title: 'Issue a new meal voucher',
+          body:
+              'Eligibility is decided before issuance. The voucher is then available to the student as a wallet-free QR pass.',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _studentIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Student ID',
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
-                const SizedBox(height: 14),
-                ElevatedButton.icon(
-                  onPressed: _loading ? null : _issueVoucher,
-                  icon: _loading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.add_card),
-                  label: Text(_loading ? 'Issuing...' : 'Issue voucher'),
-                ),
-                const SizedBox(height: 12),
-                const NourishInlineNotice(
-                  icon: Icons.info_outline,
-                  title: 'How issuance works',
-                  body:
-                      'The issuer prepares support for an eligible student. Redemption and revocation are the only chain-backed state changes.',
-                  accent: NourishColors.green,
-                ),
-              ],
-            ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _issueVoucher(),
+              ),
+              const SizedBox(height: 14),
+              ElevatedButton.icon(
+                onPressed: _loading ? null : _issueVoucher,
+                icon: _loading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.add_card),
+                label: Text(_loading ? 'Issuing...' : 'Issue voucher'),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          NourishStatusCard(
-            title: 'Demo control',
+        );
+
+        final guide = const NourishActionCard(
+          title: 'How issuance works',
+          body:
+              'The issuer prepares support for an eligible student. Redemption and revocation are the only chain-backed state changes.',
+          child: NourishInlineNotice(
+            icon: Icons.info_outline,
+            title: 'Pre-issuance rule',
             body:
-                'Use reset before stage demos to restore the seeded vouchers and keep the happy path predictable.',
-            icon: Icons.restart_alt,
-            accent: NourishColors.blue,
-            trailing: OutlinedButton(
-              onPressed: _resetting ? null : _resetDemo,
-              child: Text(_resetting ? 'Resetting...' : 'Reset demo'),
-            ),
+                'This flow only creates or refreshes a voucher. Hardship decisioning stays off-chain and out of the redemption path.',
+            accent: NourishColors.green,
           ),
-        ],
-      ),
+        );
+
+        final reset = NourishStatusCard(
+          title: 'Demo control',
+          body:
+              'Use reset before stage demos to restore the seeded vouchers and keep the happy path predictable.',
+          icon: Icons.restart_alt,
+          accent: NourishColors.blue,
+          trailing: OutlinedButton(
+            onPressed: _resetting ? null : _resetDemo,
+            child: Text(_resetting ? 'Resetting...' : 'Reset demo'),
+          ),
+        );
+
+        if (wide) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    form,
+                    const SizedBox(height: 16),
+                    guide,
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 320,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    reset,
+                    const SizedBox(height: 12),
+                    NourishActionCard(
+                      title: 'Issuer shortcuts',
+                      body: 'Keep the demo path predictable.',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: const [
+                          _MiniRoleLine(label: '1', value: 'Seed or issue before the cashier sees a QR'),
+                          _MiniRoleLine(label: '2', value: 'Revoke when eligibility changes'),
+                          _MiniRoleLine(label: '3', value: 'Log one-time override decisions'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            form,
+            const SizedBox(height: 16),
+            guide,
+            const SizedBox(height: 16),
+            reset,
+          ],
+        );
+      },
     );
   }
 
@@ -438,27 +616,32 @@ class _IssuerScreenState extends State<IssuerScreen>
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, i) {
                 final v = _vouchers[i];
+                final stateColor = v.isActive
+                    ? NourishColors.green
+                    : v.isRedeemed
+                        ? NourishColors.blue
+                        : Colors.red;
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+                    border: Border.all(color: stateColor.withValues(alpha: 0.16)),
                   ),
                   child: ListTile(
-                    leading: Icon(
-                      v.isActive
-                          ? Icons.check_circle
-                          : v.isRedeemed
-                              ? Icons.done_all
-                              : Icons.cancel,
-                      color: v.isActive
-                          ? NourishColors.green
-                          : v.isRedeemed
-                              ? NourishColors.blue
-                              : Colors.red,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    leading: CircleAvatar(
+                      backgroundColor: stateColor.withValues(alpha: 0.12),
+                      child: Icon(
+                        v.isActive
+                            ? Icons.check_circle
+                            : v.isRedeemed
+                                ? Icons.done_all
+                                : Icons.cancel,
+                        color: stateColor,
+                      ),
                     ),
                     title: Text(v.id,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
                     subtitle: Text(
                       '${v.studentName ?? v.studentId} • ${v.amountLabel ?? "1 meal"}',
                       style: const TextStyle(fontSize: 12.5),
@@ -486,6 +669,42 @@ class _IssuerScreenState extends State<IssuerScreen>
                 );
               },
             ),
+    );
+  }
+}
+
+class _MiniRoleLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniRoleLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: NourishColors.blue,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: NourishColors.slate, height: 1.35),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

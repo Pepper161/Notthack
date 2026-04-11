@@ -10,7 +10,7 @@ class ApiService {
 
   static String get baseUrl {
     if (_overrideBaseUrl.isNotEmpty) return _overrideBaseUrl;
-    if (kIsWeb) return 'http://localhost:3000/api';
+    if (kIsWeb) return '${Uri.base.origin}/api';
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => 'http://10.0.2.2:3000/api',
       TargetPlatform.iOS => 'http://localhost:3000/api',

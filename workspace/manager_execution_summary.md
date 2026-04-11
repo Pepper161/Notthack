@@ -336,3 +336,25 @@ Deferred:
 - updated `README.md` so Windows users know they can use `npm run demo` when GNU `make` is unavailable
 - result:
   - the repo now has both a WSL-oriented `make demo` path and a Windows-friendly `npm run demo` path
+
+## Switch-Style Frontend Rewrite
+
+- rewrote the Flutter home shell into a responsive editor-style layout with a desktop rail and mobile bottom navigation
+- updated the visible frontend shell to be materially different from the prior tabbed app
+- added `google_fonts`, `lucide_icons`, and `animations` so the app can track the exported Switch-style design language more closely
+- kept the backend API contract unchanged
+- validation passed:
+  - `npm run build:web`
+- result:
+  - the frontend now has a more distinctive role-switching structure
+  - backend integration remains isolated from the UI rewrite
+
+## Web API Origin Alignment
+
+- changed the Flutter web API base URL to derive from `Uri.base.origin` instead of hardcoding `http://localhost:3000/api`
+- result:
+  - the built Flutter web app now follows the backend origin it is served from
+  - `/` and `/admin` are both able to reach the same backend contract without needing a separate frontend host assumption
+- validation passed:
+  - `flutter build web`
+  - `flutter analyze` (info-only findings remain)

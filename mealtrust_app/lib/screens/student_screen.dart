@@ -85,66 +85,136 @@ class _StudentScreenState extends State<StudentScreen> {
         ),
       ],
       scrollable: false,
-      child: RefreshIndicator(
-        onRefresh: _lookupVoucher,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NourishHeaderPanel(
-                roleLabel: 'Beneficiary pass',
-                headline: 'One QR. One voucher. No wallet.',
-                body:
-                    'Show this pass at the cafeteria cashier. The student experience stays simple while the chain-backed trust state is handled behind the scenes.',
-                badges: [
-                  NourishPill(
-                    label: 'Student ID ${auth.studentId ?? "-"}',
-                    icon: Icons.badge_outlined,
-                    background: const Color(0x14FFFFFF),
-                    foreground: Colors.white,
-                  ),
-                ],
-                trailing: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.14)),
-                  ),
-                  child: const Icon(Icons.qr_code_2,
-                      color: Colors.white, size: 38),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+          final hero = NourishHeaderPanel(
+            roleLabel: 'Beneficiary pass',
+            headline: 'One QR. One voucher. No wallet.',
+            body:
+                'Show this pass at the cafeteria cashier. The student experience stays simple while the chain-backed trust state is handled behind the scenes.',
+            badges: [
+              NourishPill(
+                label: 'Student ID ${auth.studentId ?? "-"}',
+                icon: Icons.badge_outlined,
+                background: const Color(0x14FFFFFF),
+                foreground: Colors.white,
               ),
-              const SizedBox(height: 18),
-              if (_loading)
-                const Padding(
+            ],
+            trailing: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              ),
+              child: const Icon(Icons.qr_code_2,
+                  color: Colors.white, size: 38),
+            ),
+          );
+
+          final primary = _loading
+              ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 48),
                   child: Center(child: CircularProgressIndicator()),
                 )
-              else if (_error != null)
-                NourishStatusCard(
-                  title: 'Voucher unavailable',
-                  body: _error!,
-                  icon: Icons.error_outline,
-                  accent: Colors.red,
-                )
-              else if (_voucher != null)
-                _buildVoucherCard(_voucher!)
-              else
-                const NourishStatusCard(
-                  title: 'No pass loaded yet',
-                  body:
-                      'Refresh to load your current voucher. If Student Affairs has not issued one yet, this screen remains empty.',
-                  icon: Icons.hourglass_empty,
-                  accent: NourishColors.green,
+              : _error != null
+                  ? NourishStatusCard(
+                      title: 'Voucher unavailable',
+                      body: _error!,
+                      icon: Icons.error_outline,
+                      accent: Colors.red,
+                    )
+                  : _voucher != null
+                      ? _buildVoucherCard(_voucher!)
+                      : const NourishStatusCard(
+                          title: 'No pass loaded yet',
+                          body:
+                              'Refresh to load your current voucher. If Student Affairs has not issued one yet, this screen remains empty.',
+                          icon: Icons.hourglass_empty,
+                          accent: NourishColors.green,
+                        );
+
+          final side = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const NourishSectionTitle(
+                title: 'Student pass',
+                subtitle: 'Wallet-free access for the beneficiary only.',
+              ),
+              const SizedBox(height: 12),
+              NourishActionCard(
+                title: 'What the student sees',
+                body:
+                    'A single QR pass, a clear status, and no crypto wallet steps. The app should feel like a passbook, not a blockchain app.',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    _MiniStudentLine(label: 'Identity', value: 'The app only exposes the student session and voucher state'),
+                    _MiniStudentLine(label: 'Action', value: 'Show the QR to the cashier'),
+                    _MiniStudentLine(label: 'Failure', value: 'If revoked or redeemed, the card switches to a clear blocked state'),
+                  ],
                 ),
+              ),
+              const SizedBox(height: 12),
+              NourishStatusCard(
+                title: 'Refresh behavior',
+                body:
+                    'The voucher screen can be reloaded without touching any blockchain details. Use refresh if the issuer changes state.',
+                icon: Icons.refresh,
+                accent: NourishColors.blue,
+                trailing: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _loading ? null : _lookupVoucher,
+                ),
+              ),
             ],
-          ),
-        ),
+          );
+
+          if (wide) {
+            return RefreshIndicator(
+              onRefresh: _lookupVoucher,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    hero,
+                    const SizedBox(height: 18),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 5, child: primary),
+                        const SizedBox(width: 16),
+                        SizedBox(width: 330, child: side),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _lookupVoucher,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hero,
+                  const SizedBox(height: 16),
+                  primary,
+                  const SizedBox(height: 16),
+                  side,
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -261,6 +331,42 @@ class _StudentScreenState extends State<StudentScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MiniStudentLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniStudentLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 84,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: NourishColors.blue,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: NourishColors.slate, height: 1.35),
+            ),
+          ),
+        ],
       ),
     );
   }

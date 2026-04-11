@@ -167,55 +167,140 @@ class _MerchantScreenState extends State<MerchantScreen> {
         ),
       ],
       scrollable: false,
-      child: RefreshIndicator(
-        onRefresh: () async => _reset(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NourishHeaderPanel(
-                roleLabel: 'Merchant checkout',
-                headline: 'Verify first. Redeem once. Block duplicates.',
-                body:
-                    'The cashier sees one clear decision: valid, revoked, already used, or unauthorized. If the pass is valid, redemption writes a live checkpoint to localnet.',
-                badges: const [
-                  NourishPill(
-                    label: 'Happy path = verify then redeem',
-                    icon: Icons.check_circle_outline,
-                    background: Color(0x14FFFFFF),
-                    foreground: Colors.white,
-                  ),
-                ],
-                trailing: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.14)),
-                  ),
-                  child: const Icon(Icons.storefront,
-                      color: Colors.white, size: 36),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 980;
+          final hero = NourishHeaderPanel(
+            roleLabel: 'Merchant checkout',
+            headline: 'Verify first. Redeem once. Block duplicates.',
+            body:
+                'The cashier sees one clear decision: valid, revoked, already used, or unauthorized. If the pass is valid, redemption writes a live checkpoint to localnet.',
+            badges: const [
+              NourishPill(
+                label: 'Happy path = verify then redeem',
+                icon: Icons.check_circle_outline,
+                background: Color(0x14FFFFFF),
+                foreground: Colors.white,
               ),
-              const SizedBox(height: 18),
-              if (_loading)
-                const Padding(
+            ],
+            trailing: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              ),
+              child: const Icon(Icons.storefront,
+                  color: Colors.white, size: 36),
+            ),
+          );
+
+          final mainCard = _loading
+              ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 48),
                   child: Center(child: CircularProgressIndicator()),
                 )
-              else if (_redeemed && _redeemTxSignature != null)
-                _buildSuccessCard()
-              else if (_result != null)
-                _buildVerificationCard()
-              else
-                _buildScannerCard(),
+              : _redeemed && _redeemTxSignature != null
+                  ? _buildSuccessCard()
+                  : _result != null
+                      ? _buildVerificationCard()
+                      : _buildScannerCard();
+
+          final secondary = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const NourishSectionTitle(
+                title: 'Merchant flow',
+                subtitle: 'Scan, validate, redeem, and keep the line moving.',
+              ),
+              const SizedBox(height: 12),
+              NourishStatusCard(
+                title: _scanning ? 'Scanner ready' : 'Verification in progress',
+                body:
+                    _scanning ? 'Camera or manual entry is ready for the next student.' : 'The cashier is reviewing a pass before redemption.',
+                icon: _scanning ? Icons.qr_code_scanner : Icons.receipt_long,
+                accent: NourishColors.blue,
+                trailing: OutlinedButton(
+                  onPressed: _reset,
+                  child: const Text('Reset scanner'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              NourishActionCard(
+                title: 'Why this screen matters',
+                body:
+                    'The cashier only needs to know whether the pass is valid. The trust layer hides hardship details, but exposes the exact reason a voucher is blocked.',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: const [
+                    _MiniMerchantLine(label: '1', value: 'Scan or type voucher ID'),
+                    _MiniMerchantLine(label: '2', value: 'Verify status against shared trust state'),
+                    _MiniMerchantLine(label: '3', value: 'Redeem exactly once if valid'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              NourishActionCard(
+                title: 'Failure states',
+                body:
+                    'A blocked voucher should read clearly and stop the cashier from redeeming it twice.',
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: const [
+                    NourishPill(label: 'Already redeemed', icon: Icons.done_all, background: Color(0x140FAF8F), foreground: NourishColors.green, borderColor: Color(0x260FAF8F)),
+                    NourishPill(label: 'Revoked', icon: Icons.cancel_outlined, background: Color(0x14D95F5F), foreground: Colors.red, borderColor: Color(0x26D95F5F)),
+                    NourishPill(label: 'Unauthorized merchant', icon: Icons.block, background: Color(0x14EB851C), foreground: Color(0xFFE37A4A), borderColor: Color(0x26EB851C)),
+                  ],
+                ),
+              ),
             ],
-          ),
-        ),
+          );
+
+          if (wide) {
+            return RefreshIndicator(
+              onRefresh: () async => _reset(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    hero,
+                    const SizedBox(height: 18),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 6, child: mainCard),
+                        const SizedBox(width: 16),
+                        SizedBox(width: 350, child: secondary),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async => _reset(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hero,
+                  const SizedBox(height: 18),
+                  mainCard,
+                  const SizedBox(height: 16),
+                  secondary,
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -469,6 +554,42 @@ class _MerchantScreenState extends State<MerchantScreen> {
             onPressed: _reset,
             icon: const Icon(Icons.qr_code_scanner),
             label: const Text('Scan next voucher'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniMerchantLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniMerchantLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: NourishColors.blue,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: NourishColors.slate, height: 1.35),
+            ),
           ),
         ],
       ),

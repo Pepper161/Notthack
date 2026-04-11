@@ -123,10 +123,10 @@ class _AuditorScreenState extends State<AuditorScreen> {
             )
           : _error != null
               ? _buildError()
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    NourishHeaderPanel(
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final wide = constraints.maxWidth >= 1100;
+                    final hero = NourishHeaderPanel(
                       roleLabel: 'Audit trail',
                       headline: 'See the same state, the same history, and the same checkpoint story.',
                       body:
@@ -152,13 +152,9 @@ class _AuditorScreenState extends State<AuditorScreen> {
                         ),
                       ],
                       trailing: const Icon(Icons.history, color: Colors.white, size: 38),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSolanaBanner(),
-                    const SizedBox(height: 16),
-                    _buildSummaryBar(counts),
-                    const SizedBox(height: 16),
-                    NourishActionCard(
+                    );
+
+                    final filters = NourishActionCard(
                       title: 'Audit filters',
                       body:
                           'Use the filter chips and search box to isolate issuances, redemptions, revocations, blocked redemptions, or overrides.',
@@ -188,9 +184,32 @@ class _AuditorScreenState extends State<AuditorScreen> {
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
+                    );
+
+                    final stats = Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildSolanaBanner(),
+                        const SizedBox(height: 12),
+                        _buildSummaryBar(counts),
+                        const SizedBox(height: 12),
+                        NourishActionCard(
+                          title: 'What auditors should look for',
+                          body:
+                              'The important thing is not hidden hardship details. It is the sequence of events, the chain signature, and the reason a voucher became blocked.',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: const [
+                              _MiniAuditLine(label: '1', value: 'A clean issuance event'),
+                              _MiniAuditLine(label: '2', value: 'A redeem event with a Solana signature'),
+                              _MiniAuditLine(label: '3', value: 'A blocked or revoked follow-up explained by state'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+
+                    final timeline = Expanded(
                       child: _filteredEvents.isEmpty
                           ? const Center(child: Text('No events matched the current filters.'))
                           : RefreshIndicator(
@@ -205,8 +224,39 @@ class _AuditorScreenState extends State<AuditorScreen> {
                                 ),
                               ),
                             ),
-                    ),
-                  ],
+                    );
+
+                    if (wide) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          hero,
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 4, child: Column(children: [stats, const SizedBox(height: 12), filters])),
+                              const SizedBox(width: 16),
+                              Expanded(flex: 5, child: SizedBox(height: 720, child: timeline)),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        hero,
+                        const SizedBox(height: 16),
+                        stats,
+                        const SizedBox(height: 12),
+                        filters,
+                        const SizedBox(height: 12),
+                        SizedBox(height: 640, child: timeline),
+                      ],
+                    );
+                  },
                 ),
     );
   }
@@ -551,6 +601,42 @@ class _OnChainBadge extends StatelessWidget {
             const Icon(Icons.open_in_new, size: 11, color: Colors.white),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MiniAuditLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniAuditLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: NourishColors.blue,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: NourishColors.slate, height: 1.35),
+            ),
+          ),
+        ],
       ),
     );
   }
