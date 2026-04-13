@@ -617,6 +617,11 @@ if (hasFlutterWebBuild) {
 
 app.use((_req, res) => sendJsonError(res, 404, "Not found"));
 
-app.listen(port, () => {
+const host = process.env.HOST ?? '0.0.0.0';
+
+app.listen(port, host, () => {
   console.log(`Demo running at http://127.0.0.1:${port}`);
 });
+
+
+
